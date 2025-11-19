@@ -10,7 +10,7 @@ class TestObservable extends Observable {
 }
 
 // A helper observer for testing, updated for the new Observer trait
-class TestObserver extends Observer {
+class TestObserver_o extends Observer {
   var wasNotified = false
   var lastFilterFlag: Boolean = false
   override def update(isFilterUpdate: Boolean): Unit = {
@@ -25,7 +25,7 @@ class ObserverSpec extends AnyWordSpec with Matchers {
 
     "add an observer" in {
       val observable = new TestObservable()
-      val observer = new TestObserver()
+      val observer = new TestObserver_o()
       observable.getSubscribers should be(empty)
       observable.add(observer)
       observable.getSubscribers should contain(observer)
@@ -33,8 +33,8 @@ class ObserverSpec extends AnyWordSpec with Matchers {
 
     "remove an observer" in {
       val observable = new TestObservable()
-      val observer1 = new TestObserver()
-      val observer2 = new TestObserver()
+      val observer1 = new TestObserver_o()
+      val observer2 = new TestObserver_o()
       observable.add(observer1)
       observable.add(observer2)
       observable.getSubscribers should contain allOf (observer1, observer2)
@@ -46,8 +46,8 @@ class ObserverSpec extends AnyWordSpec with Matchers {
 
     "notify observers with correct flags" in {
       val observable = new TestObservable()
-      val observer1 = new TestObserver()
-      val observer2 = new TestObserver()
+      val observer1 = new TestObserver_o()
+      val observer2 = new TestObserver_o()
       observable.add(observer1)
       observable.add(observer2)
 
