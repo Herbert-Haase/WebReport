@@ -84,7 +84,6 @@ class ObserverSpec extends AnyWordSpec with Matchers {
   "An Observer" should {
 
     "receive update calls with and without parameter" in {
-      // simple test implementation to record calls
       class TestObserver extends Observer {
         var calls: List[Boolean] = Nil
         override def update(isFilterUpdate: Boolean): Unit =

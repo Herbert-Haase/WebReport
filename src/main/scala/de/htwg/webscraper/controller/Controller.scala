@@ -35,7 +35,7 @@ class Controller extends Observable with Originator {
     }
     
     override def undo(): Unit = restore(memento)
-    override def redo(): Unit = execute() // Simply re-run logic
+    override def redo(): Unit = execute()
   }
 
   class FilterCommand(word: String) extends Command {
