@@ -2,6 +2,7 @@ package de.htwg.webscraper.controller
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import java.io.{File, PrintWriter}
 
 class ControllerSpec extends AnyWordSpec with Matchers {
   "A Controller" should {
@@ -58,6 +59,46 @@ class ControllerSpec extends AnyWordSpec with Matchers {
       controller.redo() // Should reload "Initial Load"
       
       controller.data.displayLines should be(List("Initial Load"))
+    }
+  }
+    "handle loadFromFile success case" in {
+      // Create temp file
+      val file = File.createTempFile("test_scraper", ".txt")
+      file.deleteOnExit()
+      new PrintWriter(file) { write("Hello File"); close() }
+
+      val controller = new Controller()
+      controller.loadFromFile(file.getAbsolutePath)
+      
+      // Covers LoadCommand {28-31} Success path
+      controller.data.displayLines should be(List("Hello File"))
+    }
+
+    "handle loadFromFile failure case" in {
+      val controller = new Controller()
+      // Covers LoadCommand {29} .getOrElse error path
+      controller.loadFromFile("non_existent_file_XYZ.txt")
+      
+      controller.data.displayLines.head should startWith("Error: Could not read file")
+    }
+
+    "handle reset" in {
+      val controller = new Controller()
+      controller.loadFromText("Data")
+      
+      // Covers reset {61-64}
+      controller.reset()
+      controller.data.displayLines should be(empty)
+    }
+  "The UndoManager" should {
+    "handle empty stacks safely" in {
+      val controller = new Controller()
+      
+      // Covers UndoManager case Nil for undoStep
+      noException should be thrownBy controller.undo()
+      
+      // Covers UndoManager case Nil for redoStep
+      noException should be thrownBy controller.redo()
     }
   }
 }
