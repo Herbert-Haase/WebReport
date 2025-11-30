@@ -2,6 +2,7 @@ package de.htwg.webscraper.aview
 
 import de.htwg.webscraper.controller.{Controller, Observer}
 import scala.io.StdIn.readLine
+import scala.util.{Try, Success, Failure}
 
 class Tui(controller: Controller) extends Observer {
   controller.add(this)
@@ -9,7 +10,7 @@ class Tui(controller: Controller) extends Observer {
   private var state: TuiState = new InitialState()
   private var renderer: Renderer = new SimpleReport() 
   
-  // Toggles
+  // Decorator Toggles
   private var showNumbers = false
   private var showLowerCase = false
 
@@ -27,7 +28,6 @@ class Tui(controller: Controller) extends Observer {
     updateRenderer()
   }
 
-  // Fix: Stacking decorators correctly
   private def updateRenderer(): Unit = {
     var r: Renderer = new SimpleReport()
     if (showLowerCase) {
@@ -48,10 +48,13 @@ class Tui(controller: Controller) extends Observer {
 
   def inputLoop(): Unit = {
     state.displayPrompt()
-    val input = readLine()
-    if (input != null) {
+    Option(readLine()) match {
+      case Some(input) => 
         state.handleInput(input, this, controller)
         inputLoop()
+      case None => 
+        println("\nEnd of input stream. Exiting.")
+        System.exit(0)
     }
   }
 

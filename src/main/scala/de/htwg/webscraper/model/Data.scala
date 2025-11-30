@@ -15,7 +15,7 @@ object Data {
 
     val words = text
       .toLowerCase
-      .replaceAll("[^a-z]+", " ") // The '+' is crucial
+      .replaceAll("[^a-z]+", " ")
       .trim
       .split("\\s+")
       .filter(_.nonEmpty)

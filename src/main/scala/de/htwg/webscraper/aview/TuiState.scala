@@ -3,6 +3,7 @@ package de.htwg.webscraper.aview
 import de.htwg.webscraper.controller.Controller
 import scala.io.StdIn.readLine
 import scala.collection.mutable.ListBuffer
+import scala.util.{Try, Success, Failure}
 
 trait TuiState {
   def handleInput(input: String, tui: Tui, controller: Controller): Unit
@@ -17,18 +18,24 @@ class InitialState extends TuiState {
   override def handleInput(input: String, tui: Tui, controller: Controller): Unit = {
     input.split(" ").toList match {
       case "file" :: path :: Nil => 
-        controller.loadFromFile(path)
-        tui.changeState(new FilterState)
+        Try(controller.loadFromFile(path)) match {
+          case Success(_) => 
+            tui.changeState(new FilterState)
+          case Failure(e) => 
+            println(s"Error loading file: ${e.getMessage}")
+            println("Please try again.")
+        }
         
       case "text" :: Nil =>
         println("Enter text. Type '.' on a new line to finish:")
         val buffer = ListBuffer[String]()
-        var line = readLine()
-        // Strict loop to consume input safely
-        while (line != null && line != ".") {
-          buffer += line
-          line = readLine()
+        
+        var lineOpt = Option(readLine())
+        while (lineOpt.isDefined && lineOpt.get != ".") {
+          buffer += lineOpt.get
+          lineOpt = Option(readLine())
         }
+        
         controller.loadFromText(buffer.mkString("\n"))
         tui.changeState(new FilterState)
         

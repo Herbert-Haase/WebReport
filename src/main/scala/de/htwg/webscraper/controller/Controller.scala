@@ -4,6 +4,7 @@ import de.htwg.webscraper.model.Data
 import de.htwg.webscraper.util.{Command, Memento, Originator, UndoManager}
 import scala.io.Source
 import scala.util.Using
+import scala.compiletime.uninitialized
 
 class Controller extends Observable with Originator {
   var data: Data = Data(List.empty)
@@ -19,7 +20,7 @@ class Controller extends Observable with Originator {
 
   // --- Commands ---
   class LoadCommand(path: Option[String], manualText: Option[String]) extends Command {
-    var memento: Memento = _
+    var memento: Memento = uninitialized
     
     override def execute(): Unit = {
       memento = createMemento() // Save state before change
@@ -39,7 +40,7 @@ class Controller extends Observable with Originator {
   }
 
   class FilterCommand(word: String) extends Command {
-    var memento: Memento = _
+    var memento: Memento = uninitialized
 
     override def execute(): Unit = {
       memento = createMemento()
