@@ -17,28 +17,30 @@ class InitialState extends TuiState {
 
   override def handleInput(input: String, tui: Tui, controller: Controller): Unit = {
     input.split(" ").toList match {
-      case "file" :: path :: Nil => 
-        Try(controller.loadFromFile(path)) match {
-          case Success(_) => 
-            tui.changeState(new FilterState)
-          case Failure(e) => 
+      case "file" :: path :: Nil =>
+        controller.loadFromFile(path) match {
+          case Success(_) => tui.changeState(new FilterState)
+          case Failure(e) =>
             println(s"Error loading file: ${e.getMessage}")
             println("Please try again.")
         }
-        
+
       case "text" :: Nil =>
         println("Enter text. Type '.' on a new line to finish:")
         val buffer = ListBuffer[String]()
-        
+
         var lineOpt = Option(readLine())
         while (lineOpt.isDefined && lineOpt.get != ".") {
           buffer += lineOpt.get
           lineOpt = Option(readLine())
         }
-        
-        controller.loadFromText(buffer.mkString("\n"))
-        tui.changeState(new FilterState)
-        
+
+        controller.loadFromText(buffer.mkString("\n")) match {
+          case Success(_) => tui.changeState(new FilterState)
+          case Failure(e) =>
+            println(s"Error loading text: ${e.getMessage}")
+        }
+
       case "exit" :: Nil => System.exit(0)
       case _ => println("Invalid command. Try 'file <path>' or 'text'.")
     }
@@ -56,7 +58,7 @@ class FilterState extends TuiState {
       case "redo" => controller.redo()
       case "numbers" => tui.toggleLineNumbers()
       case "lower" => tui.toggleLowerCase()
-      case "reset" => 
+      case "reset" =>
         controller.reset()
         tui.changeState(new InitialState)
       case "exit" => System.exit(0)

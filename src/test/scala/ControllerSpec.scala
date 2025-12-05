@@ -17,7 +17,7 @@ class ControllerSpec extends AnyWordSpec with Matchers {
       val controller = new Controller()
       controller.loadFromText("Apple\nBanana\nApricot")
       controller.filter("Ap")
-      
+
       controller.data.displayLines should contain("Apple")
       controller.data.displayLines should contain("Apricot")
       controller.data.displayLines should not contain("Banana")
@@ -26,10 +26,10 @@ class ControllerSpec extends AnyWordSpec with Matchers {
     "Undo a filter correctly" in {
       val controller = new Controller()
       controller.loadFromText("One\nTwo\nThree")
-      
+
       controller.filter("One")
       controller.data.displayLines should be(List("One"))
-      
+
       controller.undo()
       controller.data.displayLines should be(List("One", "Two", "Three"))
     }
@@ -44,11 +44,11 @@ class ControllerSpec extends AnyWordSpec with Matchers {
     "Redo a filter correctly" in {
       val controller = new Controller()
       controller.loadFromText("A\nB\nC")
-      
+
       controller.filter("B")
       controller.undo() // Back to A, B, C
       controller.redo() // Redo Filter
-      
+
       controller.data.displayLines should be(List("B"))
     }
 
@@ -57,7 +57,7 @@ class ControllerSpec extends AnyWordSpec with Matchers {
       controller.loadFromText("Initial Load")
       controller.undo() // Data empty
       controller.redo() // Should reload "Initial Load"
-      
+
       controller.data.displayLines should be(List("Initial Load"))
     }
   }
@@ -69,23 +69,25 @@ class ControllerSpec extends AnyWordSpec with Matchers {
 
       val controller = new Controller()
       controller.loadFromFile(file.getAbsolutePath)
-      
+
       // Covers LoadCommand {28-31} Success path
       controller.data.displayLines should be(List("Hello File"))
     }
 
-    "handle loadFromFile failure case" in {
-      val controller = new Controller()
-      // Covers LoadCommand {29} .getOrElse error path
-      controller.loadFromFile("non_existent_file_XYZ.txt")
-      
-      controller.data.displayLines.head should startWith("Error: Could not read file")
-    }
+"handle loadFromFile failure case" in {
+  val controller = new Controller()
+  // Covers LoadCommand failure path
+  controller.loadFromFile("non_existent_file_XYZ.txt")
+
+  val head = controller.data.displayLines.head
+  head should startWith ("Error:")
+  head should include ("non_existent_file_XYZ.txt")
+}
 
     "handle reset" in {
       val controller = new Controller()
       controller.loadFromText("Data")
-      
+
       // Covers reset {61-64}
       controller.reset()
       controller.data.displayLines should be(empty)
@@ -93,10 +95,10 @@ class ControllerSpec extends AnyWordSpec with Matchers {
   "The UndoManager" should {
     "handle empty stacks safely" in {
       val controller = new Controller()
-      
+
       // Covers UndoManager case Nil for undoStep
       noException should be thrownBy controller.undo()
-      
+
       // Covers UndoManager case Nil for redoStep
       noException should be thrownBy controller.redo()
     }
