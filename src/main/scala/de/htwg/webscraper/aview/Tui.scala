@@ -50,18 +50,33 @@ class Tui(controller: Controller) extends Observer {
     state.displayPrompt()
     Option(readLine()) match {
       case Some(input) => 
-        state.handleInput(input, this, controller)
-        inputLoop()
+      state.handleInput(input, this, controller)
+      inputLoop()
       case None => 
-        println("\nEnd of input stream. Exiting.")
-        System.exit(0)
+      println("\nEnd of input stream. Exiting.")
+      System.exit(0)
     }
   }
 
   override def update(isFilterUpdate: Boolean): Unit = {
-    println(renderer.render(controller.data, 60))
-    if (isFilterUpdate) {
-      println(s">> Filter active. Matches: ${controller.data.displayLines.size}")
+
+    // Auto-transition to FilterState if data is loaded from GUI
+
+    if (state.isInstanceOf[InitialState] && controller.data.originalLines.nonEmpty) {
+
+      changeState(new FilterState)
+
     }
+
+    
+
+    println(renderer.render(controller.data, 60))
+
+    if (isFilterUpdate) {
+
+      println(s">> Filter active. Matches: ${controller.data.displayLines.size}")
+
+    }
+
   }
 }

@@ -10,9 +10,7 @@ lazy val root = project
     libraryDependencies ++= Seq(
       "org.scalactic" %% "scalactic" % "3.2.14",
       "org.scalatest" %% "scalatest" % "3.2.19" % Test,
-      "org.scalafx" %% "scalafx" % "21.0.0-R32",  // Use ScalaFX 21 for Java 21
-
-      // Explicitly add JavaFX 21 dependencies
+      "org.scalafx" %% "scalafx" % "21.0.0-R32",
       "org.openjfx" % "javafx-controls" % "21.0.2" classifier "linux",
       "org.openjfx" % "javafx-graphics" % "21.0.2" classifier "linux",
       "org.openjfx" % "javafx-base" % "21.0.2" classifier "linux",
@@ -23,11 +21,16 @@ lazy val root = project
     coverageExcludedFiles := ".*Main\\.scala",
 
     fork := true,
+    
+    // CRITICAL FIX: Connects your terminal input to the forked process
+    // This allows the TUI to read input instead of closing immediately.
+    connectInput in run := true,
 
-        // Suppress JavaFX and dconf warnings
+    // Suppress JavaFX warnings
     javaOptions ++= Seq(
       "-Dprism.verbose=false",
       "-Djavafx.verbose=false",
-      "--add-opens", "javafx.graphics/com.sun.javafx.application=ALL-UNNAMED"
+      // Removed the failing --add-opens line for javafx.graphics
+      "--add-opens", "javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED"
     )
   )

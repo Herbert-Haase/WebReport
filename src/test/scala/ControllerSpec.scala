@@ -60,9 +60,61 @@ class ControllerSpec extends AnyWordSpec with Matchers {
 
       controller.data.displayLines should be(List("Initial Load"))
     }
-  }
+  
+    // --- NEW TESTS START HERE ---
+
+    "handle downloadFromUrl success case" in {
+      // 1. Create a temp file to simulate a remote resource
+      val file = File.createTempFile("download_test", ".txt")
+      file.deleteOnExit()
+      new PrintWriter(file) { write("Downloaded Content"); close() }
+      
+      // 2. Convert file path to a URL (file://...)
+      val url = file.toURI.toURL.toString
+      
+      val controller = new Controller()
+      controller.downloadFromUrl(url)
+      
+      // 3. Verify content was "downloaded"
+      controller.data.displayLines should be(List("Downloaded Content"))
+    }
+
+    "handle downloadFromUrl failure case" in {
+      val controller = new Controller()
+      // 1. Try to download from a non-existent/invalid URL
+      controller.downloadFromUrl("http://invalid-url-xyz.test")
+      
+      // [cite_start]// 2. Verify error handling in Controller.scala [cite: 1]
+      val head = controller.data.displayLines.head
+      head should startWith ("Error downloading from")
+    }
+
+    "Undo and Redo a download correctly" in {
+      // Setup mock download
+      val file = File.createTempFile("undo_redo_test", ".txt")
+      file.deleteOnExit()
+      new PrintWriter(file) { write("New Data"); close() }
+      val url = file.toURI.toURL.toString
+
+      val controller = new Controller()
+      controller.loadFromText("Old Data")
+      
+      // 1. Execute Download
+      controller.downloadFromUrl(url)
+      controller.data.displayLines should be(List("New Data"))
+      
+      // 2. Undo -> Should revert to "Old Data"
+      controller.undo()
+      controller.data.displayLines should be(List("Old Data"))
+      
+      // 3. Redo -> Should re-fetch "New Data"
+      controller.redo()
+      controller.data.displayLines should be(List("New Data"))
+    }
+
+    // --- NEW TESTS END HERE ---
+
     "handle loadFromFile success case" in {
-      // Create temp file
       val file = File.createTempFile("test_scraper", ".txt")
       file.deleteOnExit()
       new PrintWriter(file) { write("Hello File"); close() }
@@ -70,36 +122,30 @@ class ControllerSpec extends AnyWordSpec with Matchers {
       val controller = new Controller()
       controller.loadFromFile(file.getAbsolutePath)
 
-      // Covers LoadCommand {28-31} Success path
       controller.data.displayLines should be(List("Hello File"))
     }
 
-"handle loadFromFile failure case" in {
-  val controller = new Controller()
-  // Covers LoadCommand failure path
-  controller.loadFromFile("non_existent_file_XYZ.txt")
+    "handle loadFromFile failure case" in {
+      val controller = new Controller()
+      controller.loadFromFile("non_existent_file_XYZ.txt")
 
-  val head = controller.data.displayLines.head
-  head should startWith ("Error:")
-  head should include ("non_existent_file_XYZ.txt")
-}
+      val head = controller.data.displayLines.head
+      head should startWith ("Error:")
+      head should include ("non_existent_file_XYZ.txt")
+    }
 
     "handle reset" in {
       val controller = new Controller()
       controller.loadFromText("Data")
-
-      // Covers reset {61-64}
       controller.reset()
       controller.data.displayLines should be(empty)
     }
+  }
+  
   "The UndoManager" should {
     "handle empty stacks safely" in {
       val controller = new Controller()
-
-      // Covers UndoManager case Nil for undoStep
       noException should be thrownBy controller.undo()
-
-      // Covers UndoManager case Nil for redoStep
       noException should be thrownBy controller.redo()
     }
   }

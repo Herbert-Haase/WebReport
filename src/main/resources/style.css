@@ -1,0 +1,73 @@
+/* --- Global Base --- */
+.root {
+    -fx-font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+    -fx-background-color: #2b2b2b; /* Dark Grey Background */
+    -fx-text-fill: #e0e0e0;
+}
+
+/* --- Toolbar Area --- */
+.tool-bar {
+    -fx-background-color: #3c3f41;
+    -fx-padding: 10px;
+    -fx-border-color: #1e1e1e;
+    -fx-border-width: 0 0 1 0; /* Bottom border only */
+}
+
+/* --- Buttons --- */
+.button {
+    -fx-background-color: #4c5052;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 6 12 6 12;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 2, 0, 0, 1);
+}
+
+.button:hover {
+    -fx-background-color: #5d6164;
+}
+
+.button:pressed {
+    -fx-background-color: #36393b;
+    -fx-effect: none; /* Flatten on press */
+}
+
+/* --- Text Inputs (TextField) --- */
+.text-field {
+    -fx-background-color: #2b2b2b;
+    -fx-text-fill: #a9b7c6; /* IntelliJ-like text color */
+    -fx-border-color: #5d6164;
+    -fx-border-radius: 3px;
+    -fx-prompt-text-fill: #6e6e6e;
+}
+
+.text-field:focused {
+    -fx-border-color: #4a88c7; /* Blue highlight focus */
+}
+
+/* --- Main Text Area (Code View) --- */
+.text-area {
+    -fx-text-fill: #a9b7c6;
+    -fx-font-family: 'Consolas', 'Monospaced';
+    -fx-font-size: 14px;
+}
+
+.text-area .content {
+    -fx-background-color: #2b2b2b;
+}
+
+/* --- Labels --- */
+.label {
+    -fx-text-fill: #bbbbbb;
+    -fx-font-size: 13px;
+}
+
+/* --- Bottom Status Bar --- */
+.status-bar {
+    -fx-background-color: #3c3f41;
+    -fx-padding: 5px;
+    -fx-border-color: #1e1e1e;
+    -fx-border-width: 1 0 0 0; /* Top border only */
+}
