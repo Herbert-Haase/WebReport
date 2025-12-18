@@ -1,10 +1,11 @@
 package de.htwg.webscraper.aview
 
-import _root_.de.htwg.webscraper.controller.{ControllerInterface}
+import _root_.de.htwg.webscraper.controller.{ControllerInterface, Exporter}
 import _root_.de.htwg.webscraper.util.Observer
 import scala.io.StdIn.readLine
 
-class Tui(controller: ControllerInterface) extends Observer {
+ 
+class Tui(controller: ControllerInterface, val exporter: Exporter) extends Observer {
   controller.add(this)
   
   private var state: TuiState = new InitialState()
@@ -34,7 +35,7 @@ class Tui(controller: ControllerInterface) extends Observer {
     state.displayPrompt()
     Option(readLine()) match {
       case Some(input) => 
-        state.handleInput(input, this, controller) 
+        state.handleInput(input, this, controller, exporter) 
         inputLoop()
       case None => 
         println("\nExiting.")

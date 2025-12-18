@@ -1,9 +1,9 @@
 package de.htwg.webscraper.util
 
-import de.htwg.webscraper.model.Data
+import de.htwg.webscraper.model.ProjectData
 
 // --- Memento Pattern ---
-case class Memento(state: Data)
+case class Memento(state: ProjectData)
 
 trait Originator {
   def createMemento(): Memento

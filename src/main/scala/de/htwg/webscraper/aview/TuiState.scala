@@ -1,11 +1,12 @@
 package de.htwg.webscraper.aview
 
-import _root_.de.htwg.webscraper.controller.ControllerInterface
+import _root_.de.htwg.webscraper.controller.{ControllerInterface, Exporter}
 import scala.io.StdIn.readLine
 import scala.collection.mutable.ListBuffer
+import scala.util.{Success, Failure}
 
 trait TuiState {
-  def handleInput(input: String, tui: Tui, controller: ControllerInterface): Unit
+  def handleInput(input: String, tui: Tui, controller: ControllerInterface, exporter: Exporter): Unit
   def displayPrompt(): Unit
 }
 
@@ -14,7 +15,7 @@ class InitialState extends TuiState {
     println("\n[Start] Enter 'file <path>', 'text', 'download <url>', or 'exit':")
   }
 
-  override def handleInput(input: String, tui: Tui, controller: ControllerInterface): Unit = {
+  override def handleInput(input: String, tui: Tui, controller: ControllerInterface, exporter: Exporter): Unit = {
     input.split(" ").toList match {
       case "file" :: path :: Nil => 
         controller.loadFromFile(path)
@@ -24,6 +25,12 @@ class InitialState extends TuiState {
         println(s"Downloading from $url ...")
         controller.downloadFromUrl(url)
         tui.changeState(new FilterState)
+
+      case "export" :: path :: Nil =>
+        exporter.exportData(controller.data, path).fold(
+          e => println(s"Error: ${e.getMessage}"),
+          msg => println(msg)
+        )
 
       case "text" :: Nil =>
         println("Enter text. Type '.' on a new line to finish:")
@@ -44,21 +51,34 @@ class InitialState extends TuiState {
 
 class FilterState extends TuiState {
   override def displayPrompt(): Unit = {
-    println("\n[Filter] Enter word to filter, 'undo', 'redo', 'reset', or 'exit':")
+    println("\n[Filter] Enter word to filter, 'export <path>', 'undo', 'redo', 'reset', or 'exit':")
   }
 
-  override def handleInput(input: String, tui: Tui, controller: ControllerInterface): Unit = {
-    input.toLowerCase match {
-      case "undo" => controller.undo()
-      case "redo" => controller.redo()
-      case "numbers" => tui.toggleLineNumbers()
-      case "lower" => tui.toggleLowerCase()
-      case "reset" => 
+  override def handleInput(input: String, tui: Tui, controller: ControllerInterface, exporter: Exporter): Unit = {
+    val parts = input.split(" ").toList
+    
+    parts match {
+      case "undo" :: Nil => controller.undo()
+      case "redo" :: Nil => controller.redo()
+      case "numbers" :: Nil => tui.toggleLineNumbers()
+      case "lower" :: Nil => tui.toggleLowerCase()
+      case "reset" :: Nil => 
         controller.reset()
         tui.changeState(new InitialState)
-      case "exit" => System.exit(0)
-      case "" => // Ignore empty
-      case word => controller.filter(word)
+      case "exit" :: Nil => System.exit(0)
+      
+      case "export" :: path :: Nil =>
+        exporter.exportData(controller.data, path).fold(
+          e => println(s"Error: ${e.getMessage}"),
+          msg => println(msg)
+        )
+        
+      case _ => 
+        if (parts.length == 1 && parts.head.nonEmpty) {
+          controller.filter(parts.head)
+        } else if (input.nonEmpty) {
+          println("Invalid command.")
+        }
     }
   }
 }

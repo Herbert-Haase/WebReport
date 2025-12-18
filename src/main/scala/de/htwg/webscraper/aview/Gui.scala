@@ -1,6 +1,6 @@
 package de.htwg.webscraper.aview
 
-import de.htwg.webscraper.controller.ControllerInterface
+import de.htwg.webscraper.controller.{ControllerInterface,Exporter}
 import de.htwg.webscraper.util.Observer
 import scalafx.scene.Scene
 import scalafx.application.Platform
@@ -14,10 +14,19 @@ import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.concurrent.Worker
 import scala.compiletime.uninitialized
 
-class Gui(controller: ControllerInterface) extends Observer {
+class Gui(controller: ControllerInterface, exporter: Exporter) extends Observer {
   controller.add(this)
 
   private var parentStage: scalafx.stage.Window = uninitialized
+
+  private def exportData(): Unit = {
+    val fileChooser = new FileChooser()
+    val file = fileChooser.showSaveDialog(parentStage)
+    if (file != null) {
+      // Direct use of the injected exporter
+      exporter.exportData(controller.data, file.getAbsolutePath)
+    }
+  }
 
   // -- Components --
   private val webView = new WebView()
