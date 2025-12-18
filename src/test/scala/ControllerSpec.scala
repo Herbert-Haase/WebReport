@@ -3,18 +3,23 @@ package de.htwg.webscraper.controller
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import java.io.{File, PrintWriter}
+import de.htwg.webscraper.model.{SimpleWebClient, SimpleAnalyzer}
 
 class ControllerSpec extends AnyWordSpec with Matchers {
   "A Controller" should {
     "load text correctly via Command" in {
-      val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
       controller.loadFromText("Hello\nWorld")
       controller.data.displayLines should be(List("Hello", "World"))
       controller.data.wordCount should be(2)
     }
 
     "filter text correctly via Command" in {
-      val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
       controller.loadFromText("Apple\nBanana\nApricot")
       controller.filter("Ap")
 
@@ -24,7 +29,9 @@ class ControllerSpec extends AnyWordSpec with Matchers {
     }
 
     "Undo a filter correctly" in {
-      val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
       controller.loadFromText("One\nTwo\nThree")
 
       controller.filter("One")
@@ -35,14 +42,18 @@ class ControllerSpec extends AnyWordSpec with Matchers {
     }
 
     "Undo a load correctly (returning to empty)" in {
-       val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
        controller.loadFromText("Data")
        controller.undo()
        controller.data.displayLines should be(empty)
     }
 
     "Redo a filter correctly" in {
-      val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
       controller.loadFromText("A\nB\nC")
 
       controller.filter("B")
@@ -53,7 +64,9 @@ class ControllerSpec extends AnyWordSpec with Matchers {
     }
 
     "Redo a load correctly" in {
-      val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
       controller.loadFromText("Initial Load")
       controller.undo() // Data empty
       controller.redo() // Should reload "Initial Load"
@@ -72,7 +85,9 @@ class ControllerSpec extends AnyWordSpec with Matchers {
       // 2. Convert file path to a URL (file://...)
       val url = file.toURI.toURL.toString
       
-      val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
       controller.downloadFromUrl(url)
       
       // 3. Verify content was "downloaded"
@@ -80,7 +95,9 @@ class ControllerSpec extends AnyWordSpec with Matchers {
     }
 
     "handle downloadFromUrl failure case" in {
-      val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
       // 1. Try to download from a non-existent/invalid URL
       controller.downloadFromUrl("http://invalid-url-xyz.test")
       
@@ -96,7 +113,9 @@ class ControllerSpec extends AnyWordSpec with Matchers {
       new PrintWriter(file) { write("New Data"); close() }
       val url = file.toURI.toURL.toString
 
-      val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
       controller.loadFromText("Old Data")
       
       // 1. Execute Download
@@ -119,14 +138,18 @@ class ControllerSpec extends AnyWordSpec with Matchers {
       file.deleteOnExit()
       new PrintWriter(file) { write("Hello File"); close() }
 
-      val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
       controller.loadFromFile(file.getAbsolutePath)
 
       controller.data.displayLines should be(List("Hello File"))
     }
 
     "handle loadFromFile failure case" in {
-      val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
       controller.loadFromFile("non_existent_file_XYZ.txt")
 
       val head = controller.data.displayLines.head
@@ -135,7 +158,9 @@ class ControllerSpec extends AnyWordSpec with Matchers {
     }
 
     "handle reset" in {
-      val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
       controller.loadFromText("Data")
       controller.reset()
       controller.data.displayLines should be(empty)
@@ -144,7 +169,9 @@ class ControllerSpec extends AnyWordSpec with Matchers {
   
   "The UndoManager" should {
     "handle empty stacks safely" in {
-      val controller = new Controller()
+      val client = new SimpleWebClient()
+      val analyzer = new SimpleAnalyzer()
+      val controller = new Controller(analyzer, client)
       noException should be thrownBy controller.undo()
       noException should be thrownBy controller.redo()
     }

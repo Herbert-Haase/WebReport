@@ -1,4 +1,4 @@
-package de.htwg.webscraper.controller
+package de.htwg.webscraper.util
 
 trait Observable {
   protected var subscribers: Vector[Observer] = Vector()

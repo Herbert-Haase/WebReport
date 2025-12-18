@@ -1,6 +1,7 @@
 package de.htwg.webscraper.aview
 
 import de.htwg.webscraper.model.Data
+import de.htwg.webscraper.model.ProjectData
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -105,7 +106,7 @@ class RendererSpec extends AnyWordSpec with Matchers {
     "delegate render calls correctly in the abstract class" in {
       val data = Data(List("Test"))
       val mockRenderer = new Renderer {
-        override def render(d: Data, w: Int): String = "Mocked"
+        override def render(d: ProjectData, w: Int): String = "Mocked"
       }
       
       // Anonymous class extending abstract decorator to test the delegation line explicitly

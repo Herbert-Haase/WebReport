@@ -1,8 +1,9 @@
 package de.htwg.webscraper.aview
 
-import de.htwg.webscraper.controller.{Controller, Observer}
-import scalafx.application.Platform
+import de.htwg.webscraper.controller.ControllerInterface
+import de.htwg.webscraper.util.Observer
 import scalafx.scene.Scene
+import scalafx.application.Platform
 import scalafx.scene.layout.{BorderPane, VBox, HBox, Priority, Region} 
 import scalafx.scene.control.{TextArea, TextField, Button, Label, ToolBar, Separator}
 import scalafx.scene.web.WebView
@@ -13,7 +14,7 @@ import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.concurrent.Worker
 import scala.compiletime.uninitialized
 
-class Gui(controller: Controller) extends Observer {
+class Gui(controller: ControllerInterface) extends Observer {
   controller.add(this)
 
   private var parentStage: scalafx.stage.Window = uninitialized
@@ -41,7 +42,7 @@ class Gui(controller: Controller) extends Observer {
 
   // -- Web Engine Configuration for Navigation --
   webView.engine.getLoadWorker.stateProperty.addListener(new ChangeListener[Worker.State] {
-    override def changed(observable: ObservableValue[_ <: Worker.State], oldValue: Worker.State, newValue: Worker.State): Unit = {
+    override def changed(observable: ObservableValue[? <: Worker.State], oldValue: Worker.State, newValue: Worker.State): Unit = {
       if (newValue == Worker.State.SUCCEEDED) {
       }
     }
@@ -49,7 +50,7 @@ class Gui(controller: Controller) extends Observer {
 
   // This listener intercepts link clicks in the WebView
   webView.engine.locationProperty.addListener(new ChangeListener[String] {
-    override def changed(observable: ObservableValue[_ <: String], oldValue: String, newValue: String): Unit = {
+    override def changed(observable: ObservableValue[? <: String], oldValue: String, newValue: String): Unit = {
       if (newValue != null && newValue.nonEmpty) {
         urlField.text = newValue
         

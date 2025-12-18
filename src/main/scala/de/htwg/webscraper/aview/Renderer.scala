@@ -1,19 +1,17 @@
 package de.htwg.webscraper.aview
 
-import de.htwg.webscraper.model.Data
+import de.htwg.webscraper.model.ProjectData
 import scala.collection.mutable.ListBuffer
 
-// --- Base Interface ---
 trait Renderer {
-  def render(data: Data, width: Int): String
+  def render(data: ProjectData, width: Int): String
 }
 
-// --- Template Method Pattern ---
 abstract class ReportTemplate extends Renderer {
-  final def render(data: Data, width: Int): String = {
+  final override def render(data: ProjectData, width: Int): String = {
     val b = new StringBuilder()
     b.append(buildHeader(width))
-    b.append(buildBody(data, width)) // Abstract step
+    b.append(buildBody(data, width))
     b.append(buildFooter(width))
     b.append(buildStats(data))
     b.toString()
@@ -22,17 +20,17 @@ abstract class ReportTemplate extends Renderer {
   protected def buildHeader(width: Int): String = "+" + "-" * width + "+\n"
   protected def buildFooter(width: Int): String = "+" + "-" * width + "+\n"
   
-  protected def buildBody(data: Data, width: Int): String
+  protected def buildBody(data: ProjectData, width: Int): String
   
-  protected def buildStats(data: Data): String = {
+  protected def buildStats(data: ProjectData): String = {
     val commonWords = data.mostCommonWords.map { case (w, c) => s"'$w'($c)" }.mkString(", ")
     s"\n[Stats] Chars: ${data.characterCount} | Words: ${data.wordCount}\n[Top Words] $commonWords\n"
   }
 }
 
-// --- Concrete Template Implementation (With Line Wrapping) ---
 class SimpleReport extends ReportTemplate {
-  override protected def buildBody(data: Data, width: Int): String = {
+  override protected def buildBody(data: ProjectData, width: Int): String = {
+    // FIX: Use wrapLines logic instead of just truncating
     val wrapped = wrapLines(data.displayLines, width)
     
     wrapped.map { line =>
@@ -40,14 +38,15 @@ class SimpleReport extends ReportTemplate {
     }.mkString
   }
 
+  // Restored Word Wrapping Logic
   private def wrapLines(lines: List[String], width: Int): List[String] = {
     val wrappedLines = ListBuffer[String]()
     
     for (line <- lines) {
       if (line.isEmpty) {
-        wrappedLines += "" // Preserve empty lines
+        wrappedLines += "" 
       } else {
-        val words = line.split(" ") // Split by simple space to preserve code structure better
+        val words = line.split(" ")
         var currentLine = new StringBuilder()
 
         for (word <- words) {
@@ -56,6 +55,7 @@ class SimpleReport extends ReportTemplate {
                wrappedLines += currentLine.toString()
                currentLine.clear()
              }
+             // Chunk huge words
              word.grouped(width).foreach(chunk => wrappedLines += chunk)
           } 
           else if (currentLine.length + 1 + word.length > width) {
@@ -77,19 +77,18 @@ class SimpleReport extends ReportTemplate {
   }
 }
 
-// --- Decorator Pattern ---
+// Decorators
 abstract class RendererDecorator(decorated: Renderer) extends Renderer {
-  override def render(data: Data, width: Int): String = decorated.render(data, width)
+  override def render(data: ProjectData, width: Int): String = decorated.render(data, width)
 }
 
 class LineNumberDecorator(decorated: Renderer) extends RendererDecorator(decorated) {
-  override def render(data: Data, width: Int): String = {
+  override def render(data: ProjectData, width: Int): String = {
     val rawOutput = decorated.render(data, width)
     val lines = rawOutput.split("\n")
     
     var counter = 1
     lines.map { line =>
-      // Only number the body lines (start with |), ignore borders (+---) and stats
       if (line.startsWith("|")) {
         val l = s"$counter. $line"
         counter += 1
@@ -102,10 +101,9 @@ class LineNumberDecorator(decorated: Renderer) extends RendererDecorator(decorat
 }
 
 class LowerCaseDecorator(decorated: Renderer) extends RendererDecorator(decorated) {
-  override def render(data: Data, width: Int): String = {
+  override def render(data: ProjectData, width: Int): String = {
     val rawOutput = decorated.render(data, width)
     rawOutput.split("\n").map { line =>
-      // Only lowercase content lines
       if (line.startsWith("|")) line.toLowerCase
       else line
     }.mkString("\n")

@@ -10,10 +10,22 @@ class DataSpec extends AnyWordSpec with Matchers {
       val filteredLines = List("This is the complete text.", "Complete and final.")
       val data = Data.fromFiltered(originalLines, filteredLines)
 
-      // "This is the complete text.\nComplete and final.".length is 46
       data.characterCount should be(46)
       data.wordCount should be(8)
       data.mostCommonWords should contain theSameElementsAs List(("complete", 2), ("and", 1), ("final", 1), ("is", 1), ("text", 1))
+    }
+
+    "be created correctly from new content (fromContent)" in {
+      val lines = List("New content line.", "Another content line.")
+      
+      val data = Data.fromContent(lines)
+
+      data.originalLines should be(lines)
+      data.displayLines should be(lines)
+      
+      data.characterCount should be(39)
+      data.wordCount should be(6)
+      data.mostCommonWords should contain (("content", 2))
     }
   }
 }
