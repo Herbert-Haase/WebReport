@@ -112,7 +112,7 @@
 }
 
 /* --- Separator Styling --- */
-.separator:vertical .line {
+.separator .line {
     -fx-border-color: #515151;
     -fx-border-width: 0 1 0 0;
 }
