@@ -1,9 +1,11 @@
 package de.htwg.webscraper.aview
 
-import _root_.de.htwg.webscraper.controller.{ControllerInterface, Exporter}
+import _root_.de.htwg.webscraper.controller.ControllerInterface
 import scala.io.StdIn.readLine
 import scala.collection.mutable.ListBuffer
 import scala.util.{Success, Failure}
+import de.htwg.webscraper.controller.exporter.Exporter
+import de.htwg.webscraper.controller.exporter.Exporter
 
 trait TuiState {
   def handleInput(input: String, tui: Tui, controller: ControllerInterface, exporter: Exporter): Unit
@@ -17,10 +19,10 @@ class InitialState extends TuiState {
 
   override def handleInput(input: String, tui: Tui, controller: ControllerInterface, exporter: Exporter): Unit = {
     input.split(" ").toList match {
-      case "file" :: path :: Nil => 
+      case "file" :: path :: Nil =>
         controller.loadFromFile(path)
         tui.changeState(new FilterState)
-        
+
       case "download" :: url :: Nil =>
         println(s"Downloading from $url ...")
         controller.downloadFromUrl(url)
@@ -42,7 +44,7 @@ class InitialState extends TuiState {
         }
         controller.loadFromText(buffer.mkString("\n"))
         tui.changeState(new FilterState)
-        
+
       case "exit" :: Nil => System.exit(0)
       case _ => println("Invalid command.")
     }
@@ -56,24 +58,24 @@ class FilterState extends TuiState {
 
   override def handleInput(input: String, tui: Tui, controller: ControllerInterface, exporter: Exporter): Unit = {
     val parts = input.split(" ").toList
-    
+
     parts match {
       case "undo" :: Nil => controller.undo()
       case "redo" :: Nil => controller.redo()
       case "numbers" :: Nil => tui.toggleLineNumbers()
       case "lower" :: Nil => tui.toggleLowerCase()
-      case "reset" :: Nil => 
+      case "reset" :: Nil =>
         controller.reset()
         tui.changeState(new InitialState)
       case "exit" :: Nil => System.exit(0)
-      
+
       case "export" :: path :: Nil =>
         exporter.exportData(controller.data, path).fold(
           e => println(s"Error: ${e.getMessage}"),
           msg => println(msg)
         )
-        
-      case _ => 
+
+      case _ =>
         if (parts.length == 1 && parts.head.nonEmpty) {
           controller.filter(parts.head)
         } else if (input.nonEmpty) {

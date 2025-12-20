@@ -3,7 +3,9 @@ package de.htwg.webscraper.controller
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import java.io.{File, PrintWriter}
-import de.htwg.webscraper.model.{SimpleWebClient, SimpleAnalyzer}
+import de.htwg.webscraper.model.webClient.impl1.simpleWebClient.*
+import de.htwg.webscraper.model.analyzer.impl1.simpleAnalyzer.*
+import de.htwg.webscraper.controller.impl1.controller.*
 
 class ControllerSpec extends AnyWordSpec with Matchers {
   "A Controller" should {
@@ -73,7 +75,7 @@ class ControllerSpec extends AnyWordSpec with Matchers {
 
       controller.data.displayLines should be(List("Initial Load"))
     }
-  
+
     // --- NEW TESTS START HERE ---
 
     "handle downloadFromUrl success case" in {
@@ -81,15 +83,15 @@ class ControllerSpec extends AnyWordSpec with Matchers {
       val file = File.createTempFile("download_test", ".txt")
       file.deleteOnExit()
       new PrintWriter(file) { write("Downloaded Content"); close() }
-      
+
       // 2. Convert file path to a URL (file://...)
       val url = file.toURI.toURL.toString
-      
+
       val client = new SimpleWebClient()
       val analyzer = new SimpleAnalyzer()
       val controller = new Controller(analyzer, client)
       controller.downloadFromUrl(url)
-      
+
       // 3. Verify content was "downloaded"
       controller.data.displayLines should be(List("Downloaded Content"))
     }
@@ -100,7 +102,7 @@ class ControllerSpec extends AnyWordSpec with Matchers {
       val controller = new Controller(analyzer, client)
       // 1. Try to download from a non-existent/invalid URL
       controller.downloadFromUrl("http://invalid-url-xyz.test")
-      
+
       // [cite_start]// 2. Verify error handling in Controller.scala [cite: 1]
       val head = controller.data.displayLines.head
       head should startWith ("Error downloading from")
@@ -117,15 +119,15 @@ class ControllerSpec extends AnyWordSpec with Matchers {
       val analyzer = new SimpleAnalyzer()
       val controller = new Controller(analyzer, client)
       controller.loadFromText("Old Data")
-      
+
       // 1. Execute Download
       controller.downloadFromUrl(url)
       controller.data.displayLines should be(List("New Data"))
-      
+
       // 2. Undo -> Should revert to "Old Data"
       controller.undo()
       controller.data.displayLines should be(List("Old Data"))
-      
+
       // 3. Redo -> Should re-fetch "New Data"
       controller.redo()
       controller.data.displayLines should be(List("New Data"))
@@ -166,7 +168,7 @@ class ControllerSpec extends AnyWordSpec with Matchers {
       controller.data.displayLines should be(empty)
     }
   }
-  
+
   "The UndoManager" should {
     "handle empty stacks safely" in {
       val client = new SimpleWebClient()

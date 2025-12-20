@@ -2,6 +2,7 @@ package de.htwg.webscraper.model
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import de.htwg.webscraper.model.data.impl1.*
 
 class DataSpec extends AnyWordSpec with Matchers {
   "A Data object" should {
@@ -17,12 +18,12 @@ class DataSpec extends AnyWordSpec with Matchers {
 
     "be created correctly from new content (fromContent)" in {
       val lines = List("New content line.", "Another content line.")
-      
+
       val data = Data.fromContent(lines)
 
       data.originalLines should be(lines)
       data.displayLines should be(lines)
-      
+
       data.characterCount should be(39)
       data.wordCount should be(6)
       data.mostCommonWords should contain (("content", 2))

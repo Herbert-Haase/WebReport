@@ -1,5 +1,8 @@
 package de.htwg.webscraper.model
 
+import de.htwg.webscraper.model.webClient.impl1.simpleWebClient.*
+import de.htwg.webscraper.model.analyzer.impl1.simpleAnalyzer.*
+
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import scala.util.{Success, Failure}
@@ -13,10 +16,10 @@ class ComponentsSpec extends AnyWordSpec with Matchers {
       val tempFile = File.createTempFile("testContent", ".txt")
       val content = "Hello World"
       new PrintWriter(tempFile) { write(content); close() }
-      
+
       val url = "file:///" + tempFile.getAbsolutePath.replace("\\", "/")
       val client = new SimpleWebClient
-      
+
       val result = client.get(url)
 
       result should be(a [Success[?]])
@@ -28,7 +31,7 @@ class ComponentsSpec extends AnyWordSpec with Matchers {
     "return a Failure when given an invalid URL" in {
       val client = new SimpleWebClient
       val result = client.get("invalid-protocol://nothing")
-      
+
       result should be(a [Failure[?]])
     }
   }
@@ -41,9 +44,9 @@ class ComponentsSpec extends AnyWordSpec with Matchers {
 
       val data = analyzer.process(originalLines, filteredLines)
 
-      data.characterCount should be(18) 
+      data.characterCount should be(18)
       data.wordCount should be(3)
-      
+
       data.originalLines should be(originalLines)
       data.displayLines should be(filteredLines)
     }

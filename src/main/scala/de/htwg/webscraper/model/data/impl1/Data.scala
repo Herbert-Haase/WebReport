@@ -1,12 +1,6 @@
-package de.htwg.webscraper.model
+package de.htwg.webscraper.model.data.impl1
 
-trait ProjectData {
-  def originalLines: List[String]
-  def displayLines: List[String]
-  def characterCount: Int
-  def wordCount: Int
-  def mostCommonWords: List[(String, Int)]
-}
+import de.htwg.webscraper.model.data.ProjectData
 
 case class Data(
     originalLines: List[String],

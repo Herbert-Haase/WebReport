@@ -1,20 +1,22 @@
 package de.htwg.webscraper.aview
 
-import _root_.de.htwg.webscraper.controller.{ControllerInterface, Exporter}
+import _root_.de.htwg.webscraper.controller.ControllerInterface
+import de.htwg.webscraper.controller.exporter.Exporter
 import _root_.de.htwg.webscraper.util.Observer
 import scala.io.StdIn.readLine
+import de.htwg.webscraper.controller.exporter.Exporter
 
- 
+
 class Tui(controller: ControllerInterface, val exporter: Exporter) extends Observer {
   controller.add(this)
-  
+
   private var state: TuiState = new InitialState()
-  private var renderer: Renderer = new SimpleReport() 
+  private var renderer: Renderer = new SimpleReport()
   private var showNumbers = false
   private var showLowerCase = false
 
   def changeState(newState: TuiState): Unit = { this.state = newState }
-  
+
   def toggleLineNumbers(): Unit = { showNumbers = !showNumbers; updateRenderer() }
   def toggleLowerCase(): Unit = { showLowerCase = !showLowerCase; updateRenderer() }
 
@@ -34,10 +36,10 @@ class Tui(controller: ControllerInterface, val exporter: Exporter) extends Obser
   def inputLoop(): Unit = {
     state.displayPrompt()
     Option(readLine()) match {
-      case Some(input) => 
-        state.handleInput(input, this, controller, exporter) 
+      case Some(input) =>
+        state.handleInput(input, this, controller, exporter)
         inputLoop()
-      case None => 
+      case None =>
         println("\nExiting.")
     }
   }

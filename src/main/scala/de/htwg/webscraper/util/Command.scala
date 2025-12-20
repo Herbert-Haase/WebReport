@@ -1,6 +1,6 @@
 package de.htwg.webscraper.util
 
-import de.htwg.webscraper.model.ProjectData
+import de.htwg.webscraper.model.data.ProjectData
 
 // --- Memento Pattern ---
 case class Memento(state: ProjectData)

@@ -1,37 +1,33 @@
-package de.htwg.webscraper.controller
+package de.htwg.webscraper.controller.impl1.controller
 
-import de.htwg.webscraper.model.{Analyzer, WebClient}
+import com.google.inject.Inject
+import de.htwg.webscraper.model.data.ProjectData
+import de.htwg.webscraper.model.webClient.WebClient
+import de.htwg.webscraper.model.analyzer.Analyzer
 import de.htwg.webscraper.util.{Command, Memento, Originator, UndoManager}
-import _root_.de.htwg.webscraper.model.ProjectData
+import de.htwg.webscraper.controller.ControllerInterface
+import _root_.de.htwg.webscraper.model.data.ProjectData
 import de.htwg.webscraper.util.Observable
 import scala.util.{Try, Success, Failure}
 import scala.io.Source
 import scala.util.Using
 import scala.compiletime.uninitialized
+import de.htwg.webscraper.model.analyzer.Analyzer
+import de.htwg.webscraper.model.webClient.WebClient
 
-trait ControllerInterface extends Observable {
-  def data: ProjectData
-  def loadFromFile(path: String): Unit
-  def loadFromText(text: String): Unit
-  def downloadFromUrl(url: String): Unit
-  def filter(word: String): Unit
-  def undo(): Unit
-  def redo(): Unit
-  def reset(): Unit
-}
 
-class Controller(
-    val analyzer: Analyzer, 
-    val client: WebClient,
+class Controller @Inject() (
+    val analyzer: Analyzer,
+    val client: WebClient
 ) extends ControllerInterface with Originator {
 
-  private var dataState: ProjectData = analyzer.process(List.empty) 
+  private var dataState: ProjectData = analyzer.process(List.empty)
   private val undoManager = new UndoManager
 
   override def data: ProjectData = dataState
 
   override def createMemento(): Memento = Memento(dataState)
-  
+
   override def restore(m: Memento): Unit = {
     dataState = m.state match {
       case d: ProjectData => d
@@ -62,7 +58,7 @@ class Controller(
 
     override def execute(): Unit = {
       memento = createMemento()
-      
+
       client.download(url) match {
         case Success(content) =>
           dataState = analyzer.process(content.split("\n").toList)
@@ -80,11 +76,11 @@ class Controller(
     var memento: Memento = uninitialized
     override def execute(): Unit = {
       memento = createMemento()
-      
+
       val filteredLines = dataState.originalLines.filter(_.toLowerCase.contains(word.toLowerCase))
-      
+
       dataState = analyzer.process(dataState.originalLines, filteredLines)
-      
+
       notifyObservers(isFilterUpdate = true)
     }
     override def undo(): Unit = restore(memento)
@@ -98,7 +94,7 @@ class Controller(
   override def filter(word: String): Unit = undoManager.doStep(new FilterCommand(word))
   override def undo(): Unit = undoManager.undoStep()
   override def redo(): Unit = undoManager.redoStep()
-  
+
   override def reset(): Unit = {
     dataState = analyzer.process(List.empty)
     notifyObservers()

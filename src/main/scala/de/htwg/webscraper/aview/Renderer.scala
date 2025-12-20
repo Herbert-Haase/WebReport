@@ -1,6 +1,6 @@
 package de.htwg.webscraper.aview
 
-import de.htwg.webscraper.model.ProjectData
+import de.htwg.webscraper.model.data.ProjectData
 import scala.collection.mutable.ListBuffer
 
 trait Renderer {
@@ -19,9 +19,9 @@ abstract class ReportTemplate extends Renderer {
 
   protected def buildHeader(width: Int): String = "+" + "-" * width + "+\n"
   protected def buildFooter(width: Int): String = "+" + "-" * width + "+\n"
-  
+
   protected def buildBody(data: ProjectData, width: Int): String
-  
+
   protected def buildStats(data: ProjectData): String = {
     val commonWords = data.mostCommonWords.map { case (w, c) => s"'$w'($c)" }.mkString(", ")
     s"\n[Stats] Chars: ${data.characterCount} | Words: ${data.wordCount}\n[Top Words] $commonWords\n"
@@ -32,7 +32,7 @@ class SimpleReport extends ReportTemplate {
   override protected def buildBody(data: ProjectData, width: Int): String = {
     // FIX: Use wrapLines logic instead of just truncating
     val wrapped = wrapLines(data.displayLines, width)
-    
+
     wrapped.map { line =>
       "|" + line.padTo(width, ' ') + "|\n"
     }.mkString
@@ -41,10 +41,10 @@ class SimpleReport extends ReportTemplate {
   // Restored Word Wrapping Logic
   private def wrapLines(lines: List[String], width: Int): List[String] = {
     val wrappedLines = ListBuffer[String]()
-    
+
     for (line <- lines) {
       if (line.isEmpty) {
-        wrappedLines += "" 
+        wrappedLines += ""
       } else {
         val words = line.split(" ")
         var currentLine = new StringBuilder()
@@ -57,12 +57,12 @@ class SimpleReport extends ReportTemplate {
              }
              // Chunk huge words
              word.grouped(width).foreach(chunk => wrappedLines += chunk)
-          } 
+          }
           else if (currentLine.length + 1 + word.length > width) {
             wrappedLines += currentLine.toString()
             currentLine.clear()
             currentLine.append(word)
-          } 
+          }
           else {
             if (currentLine.nonEmpty) currentLine.append(" ")
             currentLine.append(word)
@@ -86,7 +86,7 @@ class LineNumberDecorator(decorated: Renderer) extends RendererDecorator(decorat
   override def render(data: ProjectData, width: Int): String = {
     val rawOutput = decorated.render(data, width)
     val lines = rawOutput.split("\n")
-    
+
     var counter = 1
     lines.map { line =>
       if (line.startsWith("|")) {

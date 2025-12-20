@@ -1,5 +1,8 @@
 ## WebScraper
 [![Coverage Status](https://coveralls.io/repos/github/Herbert-Haase/WebScraper/badge.svg?branch=main)](https://coveralls.io/github/Herbert-Haase/WebScraper?branch=main)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Herbert-Haase/WebScraper/scala.yml)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Herbert-Haase_WebScraper&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Herbert-Haase_WebScraper)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Herbert-Haase_WebScraper&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Herbert-Haase_WebScraper)
 
 WebScraper is a hybrid application built in Scala, demonstrating fundamental Software Engineering design patterns such as **Model-View-Controller (MVC)**, **Command/Memento** for undo/redo functionality, **Observer** for view synchronization, and **Decorator/Template Method** for flexible reporting (TUI). It allows users to load text from local files, manually input, or download content from a specified URL, and then analyze and filter the data.
 

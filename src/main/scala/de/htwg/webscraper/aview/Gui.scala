@@ -1,10 +1,11 @@
 package de.htwg.webscraper.aview
 
-import de.htwg.webscraper.controller.{ControllerInterface,Exporter}
+import de.htwg.webscraper.controller.{ControllerInterface}
+import de.htwg.webscraper.controller.exporter.Exporter
 import de.htwg.webscraper.util.Observer
 import scalafx.scene.Scene
 import scalafx.application.Platform
-import scalafx.scene.layout.{BorderPane, VBox, HBox, Priority, Region} 
+import scalafx.scene.layout.{BorderPane, VBox, HBox, Priority, Region}
 import scalafx.scene.control.{TextArea, TextField, Button, Label, ToolBar, Separator}
 import scalafx.scene.web.WebView
 import scalafx.stage.FileChooser
@@ -13,6 +14,7 @@ import scalafx.Includes._
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.concurrent.Worker
 import scala.compiletime.uninitialized
+import de.htwg.webscraper.controller.exporter.Exporter
 
 class Gui(controller: ControllerInterface, exporter: Exporter) extends Observer {
   controller.add(this)
@@ -34,15 +36,15 @@ class Gui(controller: ControllerInterface, exporter: Exporter) extends Observer 
     editable = false
     styleClass += "code-area"
   }
-  
+
   private val pathField = new TextField { hgrow = Priority.Always; promptText = "File path..." }
-  private val filterField = new TextField { 
-    promptText = "Filter word..."; 
+  private val filterField = new TextField {
+    promptText = "Filter word...";
     onAction = _ => controller.filter(text.value)
   }
   private val statusLabel = new Label("Welcome to WebScraper")
-  private val urlField = new TextField { 
-    promptText = "http://..."; 
+  private val urlField = new TextField {
+    promptText = "http://...";
     onAction = _ => {
       val url = text.value
       if (url.nonEmpty) controller.downloadFromUrl(url)
@@ -62,7 +64,7 @@ class Gui(controller: ControllerInterface, exporter: Exporter) extends Observer 
     override def changed(observable: ObservableValue[? <: String], oldValue: String, newValue: String): Unit = {
       if (newValue != null && newValue.nonEmpty) {
         urlField.text = newValue
-        
+
         Platform.runLater {
           controller.downloadFromUrl(newValue)
         }
@@ -71,13 +73,13 @@ class Gui(controller: ControllerInterface, exporter: Exporter) extends Observer 
   })
 
   // -- Layout Definitions --
-  
+
   private val mainToolbar = new ToolBar {
       val spacer = new Region { hgrow = Priority.Always }
       content = List(
       new Button("📂 Open") { onAction = _ => openFileChooser() },
       urlField,
-      new Button("⬇ Download") { 
+      new Button("⬇ Download") {
         onAction = _ => {
           val url = urlField.text.value
           if (url.nonEmpty) controller.downloadFromUrl(url)
@@ -92,8 +94,8 @@ class Gui(controller: ControllerInterface, exporter: Exporter) extends Observer 
 
       new Separator,
       spacer,
-      new Button("Reset") { 
-        style = "-fx-background-color: #cdb91dff;" 
+      new Button("Reset") {
+        style = "-fx-background-color: #cdb91dff;"
         onAction = _ => {
           controller.reset()
           filterField.text = ""
@@ -101,8 +103,8 @@ class Gui(controller: ControllerInterface, exporter: Exporter) extends Observer 
         }
       },
 
-      new Button("✖") { 
-        style = "-fx-background-color: #8b0000;" 
+      new Button("✖") {
+        style = "-fx-background-color: #8b0000;"
         onAction = _ => Platform.exit()
       }
       )
@@ -134,7 +136,7 @@ class Gui(controller: ControllerInterface, exporter: Exporter) extends Observer 
 
     // Trigger initial update
     update(false)
-    
+
     myScene
   }
 
