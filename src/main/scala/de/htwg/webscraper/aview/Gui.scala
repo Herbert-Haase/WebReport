@@ -45,7 +45,7 @@ class Gui(controller: ControllerInterface, exporter: Exporter) extends Observer 
     style = "-fx-accent: green;" 
   }
   private val famousLibLabel = new Label("Libraries: None") {
-  maxWidth = 300
+  maxWidth = 600
   wrapText = false
   style = "-fx-text-overrun: ellipsis;"
   }

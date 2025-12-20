@@ -6,6 +6,11 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.webscraper.aview.Renderer
 
+import org.scalatest. wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
+import de.htwg.webscraper.aview.{SimpleReport, LowerCaseDecorator, LineNumberDecorator}
+import de.htwg.webscraper.model.data.impl1.Data
+
 class RendererSpec extends AnyWordSpec with Matchers {
 
   val sampleData = Data(List("Hello World", "Scala is Fun"))
@@ -114,6 +119,74 @@ class RendererSpec extends AnyWordSpec with Matchers {
       val decorator = new RendererDecorator(mockRenderer) {}
 
       decorator.render(data, 10) should be("Mocked")
+    }
+  }
+  "SimpleReport" should {
+    "render data to string" in {
+      val elements = List("<html><body><h1>Test</h1></body></html>")
+      val data = Data.fromContent(elements)
+      val renderer = new SimpleReport()
+      
+      val result = renderer.render(data, 80)
+      result.nonEmpty shouldBe true
+    }
+    
+    "render with different widths" in {
+      val elements = List("<html><body><h1>Test</h1></body></html>")
+      val data = Data.fromContent(elements)
+      val renderer = new SimpleReport()
+      
+      val narrowResult = renderer.render(data, 40)
+      val wideResult = renderer.render(data, 120)
+      
+      narrowResult. nonEmpty shouldBe true
+      wideResult.nonEmpty shouldBe true
+    }
+  }
+  
+  "LowerCaseDecorator" should {
+    "convert output to lowercase" in {
+      val elements = List("<html><body><h1>TEST</h1></body></html>")
+      val data = Data. fromContent(elements)
+      val baseRenderer = new SimpleReport()
+      val decorator = new LowerCaseDecorator(baseRenderer)
+      
+      val result = decorator.render(data, 80)
+      result.nonEmpty shouldBe true
+    }
+  }
+  
+  "LineNumberDecorator" should {
+    "add line numbers to output" in {
+      val elements = List("<html><body><h1>Test</h1></body></html>")
+      val data = Data. fromContent(elements)
+      val baseRenderer = new SimpleReport()
+      val decorator = new LineNumberDecorator(baseRenderer)
+      
+      val result = decorator.render(data, 80)
+      result.nonEmpty shouldBe true
+    }
+  }
+  
+  "RendererDecorator" should {
+    "work as base decorator" in {
+      val elements = List("<html><body><h1>Test</h1></body></html>")
+      val data = Data.fromContent(elements)
+      val baseRenderer = new SimpleReport()
+      
+      val result = baseRenderer.render(data, 80)
+      result.nonEmpty shouldBe true
+    }
+    
+    "support chaining decorators" in {
+      val elements = List("<html><body><h1>Test</h1></body></html>")
+      val data = Data.fromContent(elements)
+      val baseRenderer = new SimpleReport()
+      val withLineNumbers = new LineNumberDecorator(baseRenderer)
+      val withBoth = new LowerCaseDecorator(withLineNumbers)
+      
+      val result = withBoth.render(data, 80)
+      result.nonEmpty shouldBe true
     }
   }
 }
