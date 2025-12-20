@@ -6,12 +6,12 @@ import java.io.{File, BufferedWriter, FileWriter}
 import scala.util.Try
 
 class XmlExporter extends Exporter {
-
   override def exportData(data: ProjectData, filePath: String): Try[String] = Try {
     val libsXml = data.libraries.map(lib => s"    <lib>$lib</lib>").mkString("\n")
-    val wordsXml = data.mostCommonWords.map { case (w, c) => 
-      s"    <word count=\"$c\">$w</word>" 
-    }.mkString("\n")
+    val wordsXml = data.mostCommonWords.map { case (w, c) => s"    <word count=\"$c\">$w</word>" }.mkString("\n")
+    
+    val imagesXml = data.images.map(img => s"    <image>$img</image>").mkString("\n")
+    val linksXml = data.links.map(lnk => s"    <link>$lnk</link>").mkString("\n")
 
     val xmlContent = s"""<analysis>
   <meta>
@@ -19,8 +19,12 @@ class XmlExporter extends Exporter {
     <lines>${data.lineCount}</lines>
     <totalWords>${data.wordCount}</totalWords>
     <complexity>${data.complexity}</complexity>
-    <images>${data.imageCount}</images>
-    <links>${data.linkCount}</links>
+    <images count="${data.imageCount}">
+$imagesXml
+    </images>
+    <links count="${data.linkCount}">
+$linksXml
+    </links>
   </meta>
   <anatomy>
     <libraries>

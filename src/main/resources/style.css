@@ -71,3 +71,48 @@
     -fx-border-color: #1e1e1e;
     -fx-border-width: 1 0 0 0; /* Top border only */
 }
+
+/* --- Dashboard Header Area --- */
+.dashboard-bar {
+    -fx-background-color: #313335; /* Slightly lighter than root, darker than toolbar */
+    -fx-border-color: #1e1e1e;
+    -fx-border-width: 0 0 1 0;
+    -fx-text-fill: #a9b7c6;
+}
+
+.dashboard-label-header {
+    -fx-font-weight: bold;
+    -fx-text-fill: #bababa;
+    -fx-font-size: 12px;
+}
+
+/* --- Status Bar (Bottom) --- */
+.status-bar {
+    -fx-background-color: #3c3f41;
+    -fx-border-color: #1e1e1e;
+    -fx-border-width: 1 0 0 0; /* Top border only */
+}
+
+/* Ensure labels inside bars are light colored */
+.status-bar .label, .dashboard-bar .label {
+    -fx-text-fill: #a9b7c6;
+}
+
+/* --- Progress Bar Dark Styling --- */
+.progress-bar {
+    -fx-background-color: #2b2b2b;
+    -fx-background-insets: 0;
+    -fx-padding: 2px;
+}
+
+.progress-bar .track {
+    -fx-background-color: #45494a;
+    -fx-background-insets: 0;
+    -fx-background-radius: 2px;
+}
+
+/* --- Separator Styling --- */
+.separator:vertical .line {
+    -fx-border-color: #515151;
+    -fx-border-width: 0 1 0 0;
+}

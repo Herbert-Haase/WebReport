@@ -11,6 +11,8 @@ trait ProjectData {
   def lineCount: Int
   def imageCount: Int
   def linkCount: Int
+  def images: List[String]
+  def links: List[String]
 }
 
 object ProjectData {
