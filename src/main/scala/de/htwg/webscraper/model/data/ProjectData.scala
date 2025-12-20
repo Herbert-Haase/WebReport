@@ -6,24 +6,12 @@ trait ProjectData {
   def characterCount: Int
   def wordCount: Int
   def mostCommonWords: List[(String, Int)]
+  def libraries: List[String]
+  def complexity: Int
+  def lineCount: Int
+  def imageCount: Int
+  def linkCount: Int
 }
 
 object ProjectData {
-  def apply(
-      originalLines: List[String],
-      displayLines: List[String],
-      characterCount: Int,
-      wordCount: Int,
-      mostCommonWords: List[(String, Int)]
-  ): ProjectData = {
-    ProjectDataImpl(originalLines, displayLines, characterCount, wordCount, mostCommonWords)
-  }
-
-  private case class ProjectDataImpl(
-      originalLines: List[String],
-      displayLines: List[String],
-      characterCount: Int,
-      wordCount: Int,
-      mostCommonWords: List[(String, Int)]
-  ) extends ProjectData
 }
