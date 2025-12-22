@@ -17,31 +17,46 @@ abstract class ReportTemplate extends Renderer {
     b.toString()
   }
 
-  protected def buildHeader(width: Int): String = "+" + "-" * width + "+\n"
-  protected def buildFooter(width: Int): String = "+" + "-" * width + "+\n"
+  // Professional Unicode Borders
+  protected def buildHeader(width: Int): String = "┌" + "─" * (width - 2) + "┐\n"
+  protected def buildFooter(width: Int): String = "└" + "─" * (width - 2) + "┘\n"
 
   protected def buildBody(data: ProjectData, width: Int): String
 
   protected def buildStats(data: ProjectData): String = {
     val commonWords = data.mostCommonWords.map { case (w, c) => s"'$w'($c)" }.mkString(", ")
-    s"\n[Stats] Chars: ${data.characterCount} | Words: ${data.wordCount} | Lines: ${data.lineCount}\n[Top Words] $commonWords\n"
+    s"\n${Console.BOLD}[Stats]${Console.RESET} Chars: ${data.characterCount} | Words: ${data.wordCount} | Lines: ${data.lineCount}\n" +
+    s"${Console.BOLD}[Top Words]${Console.RESET} $commonWords\n"
   }
 }
 
 class SimpleReport extends ReportTemplate {
   override protected def buildBody(data: ProjectData, width: Int): String = {
-    // FIX: Use wrapLines logic instead of just truncating
-    val wrapped = wrapLines(data.displayLines, width)
+    // Subtract 4 for the left border "│ " and right border " │"
+    val contentWidth = width - 4
+    val wrapped = wrapLines(data.displayLines, contentWidth)
 
     wrapped.map { line =>
-      "|" + line.padTo(width, ' ') + "|\n"
+      // Alignment Fix: Pad the RAW text first, THEN colorize
+      val paddedLine = line.padTo(contentWidth, ' ')
+      val coloredLine = colorizeHtml(paddedLine)
+      s"│ $coloredLine │\n"
     }.mkString
   }
 
-  // Restored Word Wrapping Logic
+  private def colorizeHtml(text: String): String = {
+    val tagColor = Console.YELLOW
+    val attrColor = Console.MAGENTA
+    val reset = Console.RESET
+
+    // Using the logic from your screenshot with alignment-safe replacement
+    text
+      .replaceAll("(<[^>]+>)", s"$tagColor$$1$reset")
+      .replaceAll("(\\w+)=['\"]", s"$attrColor$$1$reset='")
+  }
+
   private def wrapLines(lines: List[String], width: Int): List[String] = {
     val wrappedLines = ListBuffer[String]()
-
     for (line <- lines) {
       if (line.isEmpty) {
         wrappedLines += ""
@@ -55,7 +70,6 @@ class SimpleReport extends ReportTemplate {
                wrappedLines += currentLine.toString()
                currentLine.clear()
              }
-             // Chunk huge words
              word.grouped(width).foreach(chunk => wrappedLines += chunk)
           }
           else if (currentLine.length + 1 + word.length > width) {
@@ -68,9 +82,7 @@ class SimpleReport extends ReportTemplate {
             currentLine.append(word)
           }
         }
-        if (currentLine.nonEmpty) {
-          wrappedLines += currentLine.toString()
-        }
+        if (currentLine.nonEmpty) wrappedLines += currentLine.toString()
       }
     }
     wrappedLines.toList

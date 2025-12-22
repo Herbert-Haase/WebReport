@@ -33,7 +33,9 @@ class Tui(controller: ControllerInterface, val fileIO: FileIO) extends Observer 
   }
 
   def run(): Unit = {
-    println("Welcome to WebScraper")
+    print("\u001b[H\u001b[2J") 
+    System.out.flush()
+    println(s"${Console.BOLD}${Console.CYAN} WEB SCRAPER v1.0 ${Console.RESET}")
     inputLoop()
   }
 
@@ -62,22 +64,42 @@ class Tui(controller: ControllerInterface, val fileIO: FileIO) extends Observer 
     s"[$color$bar${Console.RESET}] ($score)"
   }
 
-    override def update(isFilterUpdate: Boolean): Unit = {
-    val d = controller.data
-    // println("-" * 60)
-    println(renderer.render(controller.data, 60))
-    println(s"[Metrics]")
-    // println(s" Chars: ${d.characterCount} | Words: ${d.wordCount} | Lines: ${d.lineCount}")
-    println(s" Images: ${d.imageCount} | Links: ${d.linkCount}")
+  private def getTerminalWidth: Int = {
+    import scala.sys.process._
+    try {
+      // Queries the terminal for its width; defaults to 80 if it fails
+      "tput cols".!!.trim.toInt
+    } catch {
+      case _: Exception => 80 
+    }
+  }
+
+  private def renderMetrics(): Unit = {
+    val stats = f"${Console.BOLD}Chars:${Console.RESET} ${controller.data.characterCount}%-8s " +
+                f"${Console.BOLD}Words:${Console.RESET} ${controller.data.wordCount}%-8s " +
+                f"${Console.BOLD}Links:${Console.RESET} ${Console.BLUE}${controller.data.linkCount}${Console.RESET}"
     
+    println(s"│ $stats │")
+    println(s"│ Complexity: ${renderComplexityBar(controller.data.complexity)} │")
+  }
+  override def update(isFilterUpdate: Boolean): Unit = {
+    val width = getTerminalWidth
+    val d = controller.data
+    
+    // Clear screen for that "Application" feel
+    print("\u001b[H\u001b[2J")
+    
+    // Render the box with dynamic width
+    println(renderer.render(d, width))
+    
+    println(s"${Console.BOLD}[Metrics]${Console.RESET}")
+    println(s" Images: ${d.imageCount} | Links: ${d.linkCount}")
     println(s" Complexity: ${renderComplexityBar(d.complexity)}")
     
     val visibleLibs = d.libraries.filter(l => famousLibs.exists(fl => l.toLowerCase.contains(fl)))
-    println(s" Famous Libs: ${if (visibleLibs.isEmpty) "None detected" else visibleLibs.mkString(", ")}")
+    println(s" Famous Libs: ${if (visibleLibs.isEmpty) "None" else visibleLibs.mkString(", ")}")
     
-    println("-" * 60)
-    if (isFilterUpdate) {
-      println(s">> Filter active. Matches: ${controller.data.displayLines.size}")
-    }
+    println("─" * width) // Dynamic separator
   }
+
 }
