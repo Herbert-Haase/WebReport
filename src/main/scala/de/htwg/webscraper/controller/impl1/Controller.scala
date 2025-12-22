@@ -5,7 +5,7 @@ import de.htwg.webscraper.controller.ControllerInterface
 import de.htwg.webscraper.model.analyzer.Analyzer
 import de.htwg.webscraper.model.data.ProjectData
 import de.htwg.webscraper.model.webClient.WebClient
-import de.htwg.webscraper.model.fileio.FileIO // Inject FileIO
+import de.htwg.webscraper.model.fileio.FileIO
 import de.htwg.webscraper.util.{Command, Memento, Originator, UndoManager}
 import scala.util.{Failure, Success, Try, Using}
 import scala.io.Source
@@ -14,13 +14,14 @@ import scala.compiletime.uninitialized
 class Controller @Inject() (
     val analyzer: Analyzer,
     val client: WebClient,
-    val fileIO: FileIO // Added Injection
+    val fileIO: FileIO
 ) extends ControllerInterface with Originator {
+
+  override def storageMode: String = fileIO.mode
 
   private var dataState: ProjectData = analyzer.process(List.empty, Nil, "empty")
   private val undoManager = new UndoManager
   
-  // Requirement: "Cumulative export... all data states between resets"
   private var sessionHistory: List[ProjectData] = Nil
 
   override def data: ProjectData = dataState
@@ -32,28 +33,67 @@ class Controller @Inject() (
     notifyObservers()
   }
 
-  // --- Helper to update history ---
-  private def addToHistory(newData: ProjectData): Unit = {
-    dataState = newData
-    sessionHistory = sessionHistory :+ newData
+  class SetStateCommand(newState: ProjectData) extends Command {
+    var memento: Memento = uninitialized
+    override def execute(): Unit = {
+      memento = createMemento()
+      dataState = newState
+      sessionHistory = sessionHistory :+ newState
+      notifyObservers()
+    }
+    override def undo(): Unit = restore(memento)
+    override def redo(): Unit = execute()
+  }
+
+  // --- API ---
+
+  override def loadFromFile(path: String): Unit = {
+    Try(fileIO.load(path)) match {
+      case Success(history) if history.nonEmpty =>
+        reset()
+        history.foreach { state =>
+          undoManager.doStep(new SetStateCommand(state))
+        }
+      case _ =>
+        undoManager.doStep(new LoadCommand(Some(path), None))
+    }
+  }
+
+  override def saveSession(path: String): Unit = {
+    fileIO.save(sessionHistory, path)
+  }
+
+  override def downloadFromUrl(url: String): Unit = undoManager.doStep(new DownloadCommand(url))
+  override def loadFromText(text: String): Unit = undoManager.doStep(new LoadCommand(None, Some(text)))
+  override def filter(word: String): Unit = undoManager.doStep(new FilterCommand(word))
+  
+  override def undo(): Unit = undoManager.undoStep()
+  override def redo(): Unit = undoManager.redoStep()
+
+  override def reset(): Unit = {
+    dataState = analyzer.process(List.empty, Nil, "empty")
+    sessionHistory = Nil 
     notifyObservers()
   }
 
-  // --- Commands ---
+  // --- Existing Commands (Refined) ---
+
   class LoadCommand(path: Option[String], manualText: Option[String]) extends Command {
     var memento: Memento = uninitialized
     override def execute(): Unit = {
       memento = createMemento()
       val lines = if (path.isDefined) {
         Using(Source.fromFile(path.get))(_.getLines().toList)
-          .getOrElse(List(s"Error: Could not read file '${path.get}'"))
+          .getOrElse(List(s"Error reading '${path.get}'"))
       } else {
         manualText.getOrElse("").split("\n").toList
       }
-      
       val label = path.getOrElse("text-input")
-      // Update state and History
-      addToHistory(analyzer.process(lines, Nil, label))
+      val newState = analyzer.process(lines, Nil, label)
+      
+      dataState = newState
+      sessionHistory = sessionHistory :+ newState
+      notifyObservers()
     }
     override def undo(): Unit = restore(memento)
     override def redo(): Unit = execute()
@@ -65,63 +105,29 @@ class Controller @Inject() (
       memento = createMemento()
       client.download(url) match {
         case Success(content) =>
-          addToHistory(analyzer.process(content.split("\n").toList, Nil, url))
+          val newState = analyzer.process(content.split("\n").toList, Nil, url)
+          dataState = newState
+          sessionHistory = sessionHistory :+ newState
         case Failure(e) =>
-          addToHistory(analyzer.process(List(s"Error: ${e.getMessage}"), Nil, url))
+          val newState = analyzer.process(List(s"Error: ${e.getMessage}"), Nil, url)
+          dataState = newState
+          sessionHistory = sessionHistory :+ newState
       }
+      notifyObservers()
     }
     override def undo(): Unit = restore(memento)
     override def redo(): Unit = execute()
   }
-
+  
   class FilterCommand(word: String) extends Command {
     var memento: Memento = uninitialized
     override def execute(): Unit = {
       memento = createMemento()
       val filteredLines = dataState.originalLines.filter(_.toLowerCase.contains(word.toLowerCase))
-      // Filter does NOT add to session history (usually), just updates view
       dataState = analyzer.process(dataState.originalLines, filteredLines, dataState.source)
       notifyObservers(isFilterUpdate = true)
     }
     override def undo(): Unit = restore(memento)
     override def redo(): Unit = execute()
-  }
-  
-  // --- New Import Logic ---
-  // We don't wrap this in a Command because it REPLACES the whole session history
-  private def importSession(path: String): Boolean = {
-    Try(fileIO.load(path)) match {
-      case Success(history) if history.nonEmpty =>
-        sessionHistory = history
-        dataState = history.last
-        notifyObservers()
-        true
-      case _ => false
-    }
-  }
-
-  // --- API ---
-  override def loadFromFile(path: String): Unit = {
-    // Smart Load: Try to load as XML/JSON session first. If fail, load as text.
-    if (!importSession(path)) {
-      undoManager.doStep(new LoadCommand(Some(path), None))
-    }
-  }
-  
-  // NEW: Save Cumulative Session
-  override def saveSession(path: String): Unit = {
-    fileIO.save(sessionHistory, path)
-  }
-
-  override def loadFromText(text: String): Unit = undoManager.doStep(new LoadCommand(None, Some(text)))
-  override def downloadFromUrl(url: String): Unit = undoManager.doStep(new DownloadCommand(url))
-  override def filter(word: String): Unit = undoManager.doStep(new FilterCommand(word))
-  override def undo(): Unit = undoManager.undoStep()
-  override def redo(): Unit = undoManager.redoStep()
-
-  override def reset(): Unit = {
-    dataState = analyzer.process(List.empty, Nil, "empty")
-    sessionHistory = Nil // Clear history on reset
-    notifyObservers()
   }
 }

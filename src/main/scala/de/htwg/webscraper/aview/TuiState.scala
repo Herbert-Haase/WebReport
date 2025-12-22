@@ -13,25 +13,32 @@ trait TuiState {
 
 class InitialState extends TuiState {
   override def displayPrompt(): Unit = {
-    println("\n[Start] Enter 'file <path>', 'text', 'download <url>', or 'exit':")
+    val help = s"${Console.WHITE}(download <url> | load <path> | text | exit)${Console.RESET}"
+    val prompt = s"${Console.CYAN}${Console.BOLD} scraper>${Console.RESET} "
+    
+    println(s"\n$help")
+    print(prompt)
   }
 
   override def handleInput(input: String, tui: Tui, controller: ControllerInterface, fileIO: FileIO): Unit = {
-    input.split(" ").toList match {
-      case "file" :: path :: Nil =>
-        controller.loadFromFile(path)
+    val parts = input.trim.split("\\s+", 2)
+    val command = parts(0).toLowerCase
+    val argument = if (parts.length > 1) parts(1) else ""
+
+    command match {
+      case "download" => 
         tui.changeState(new FilterState)
-
-      case "download" :: url :: Nil =>
-        println(s"Downloading from $url ...")
-        controller.downloadFromUrl(url)
-        tui.changeState(new FilterState)
-
-      case "export" :: path :: Nil =>
-        controller.saveSession(path)
-        println(s"Session saved to $path")
-
-      case "text" :: Nil =>
+        controller.downloadFromUrl(argument)
+        
+      case "import" | "load" => 
+        if (argument.nonEmpty) {
+          tui.changeState(new FilterState)
+          controller.loadFromFile(argument)
+        } else {
+          println("Usage: import <filepath>")
+          tui.update(false) 
+        }
+      case "text" =>
         println("Enter text. Type '.' on a new line to finish:")
         val buffer = ListBuffer[String]()
         var lineOpt = Option(readLine())
@@ -39,18 +46,23 @@ class InitialState extends TuiState {
           buffer += lineOpt.get
           lineOpt = Option(readLine())
         }
-        controller.loadFromText(buffer.mkString("\n"))
         tui.changeState(new FilterState)
-
-      case "exit" :: Nil => System.exit(0)
-      case _ => println("Invalid command.")
+        controller.loadFromText(buffer.mkString("\n"))
+        
+      case "exit" | "quit" => 
+        println("Bye!")
+        System.exit(0)
+        
+      case _ => 
+        println(s"Invalid command: $command")
+        tui.update(false)
     }
   }
 }
 
 class FilterState extends TuiState {
   override def displayPrompt(): Unit = {
-    println("\n[Filter] Enter word to filter, 'export <path>', 'undo', 'redo', 'reset', or 'exit':")
+    println("\n[Filter] Enter word to filter, 'export <path>', 'ln', 'undo', 'redo', 'reset', or 'exit':")
   }
 
   override def handleInput(input: String, tui: Tui, controller: ControllerInterface, FileIO: FileIO): Unit = {
@@ -59,8 +71,7 @@ class FilterState extends TuiState {
     parts match {
       case "undo" :: Nil => controller.undo()
       case "redo" :: Nil => controller.redo()
-      case "numbers" :: Nil => tui.toggleLineNumbers()
-      case "lower" :: Nil => tui.toggleLowerCase()
+      case "ln" :: Nil => tui.toggleLineNumbers()
       case "reset" :: Nil =>
         controller.reset()
         tui.changeState(new InitialState)

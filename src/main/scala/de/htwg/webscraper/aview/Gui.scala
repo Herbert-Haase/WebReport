@@ -13,11 +13,9 @@ import scalafx.Includes._
 import javafx.concurrent.Worker
 import scala.compiletime.uninitialized
 
-// Note: Exporter is removed from constructor, we use Controller now
 class Gui(controller: ControllerInterface) extends Observer {
   controller.add(this)
 
-  // Filter for display logic
   private val famousLibs = Set("react", "angular", "vue", "svelte", "jquery", "bootstrap", "tailwind")
   private var parentStage: scalafx.stage.Window = uninitialized
 
@@ -27,14 +25,21 @@ class Gui(controller: ControllerInterface) extends Observer {
   private val urlField = new TextField {
     promptText = "http://..."
     hgrow = Priority.Always
-    onAction = _ => if (text.value.nonEmpty) controller.downloadFromUrl(text.value)
+    onAction = _ => {
+      if (text.value.nonEmpty) {
+        controller.downloadFromUrl(text.value)
+        text.value = ""
+      }
+    }
+  }
+  val modeLabel = new Label(s"Storage: ${controller.storageMode}") {
+    style = "-fx-text-fill: #808080; -fx-padding: 0 0 0 10;"
   }
   
   private val statusLabel = new Label("Welcome to WebScraper")
   private val complexityLabel = new Label("Complexity: 0")
   private val complexityBar = new ProgressBar() { prefWidth = 150 }
   
-  // Improved Label with Tooltip support for long lists
   private val famousLibLabel = new Label("Libraries: None") {
     maxWidth = 400
     styleClass += "dashboard-text"
@@ -44,19 +49,24 @@ class Gui(controller: ControllerInterface) extends Observer {
   // -- Toolbar --
   private val mainToolbar = new ToolBar {
     content = List(
-      // Smart Open: Handles Text files AND XML/JSON Sessions
       new Button("📂 Open/Import") { onAction = _ => openFileChooser() },
       
       new Separator,
       urlField,
-      new Button("⬇ Download") { onAction = _ => if (urlField.text.value.nonEmpty) controller.downloadFromUrl(urlField.text.value) },
+      new Button("⬇ Download") { 
+        onAction = _ => {
+          if (urlField.text.value.nonEmpty) {
+            controller.downloadFromUrl(urlField.text.value)
+            urlField.text.value = ""
+          }
+        }
+      },
       
       new Separator,
       new Button("↶") { onAction = _ => controller.undo(); tooltip = new Tooltip("Undo") },
       new Button("↷") { onAction = _ => controller.redo(); tooltip = new Tooltip("Redo") },
       
       new Separator,
-      // Export Session
       new Button("💾 Export Session") { 
         onAction = _ => exportSession() 
         tooltip = new Tooltip("Save cumulative history to XML/JSON")
@@ -68,14 +78,9 @@ class Gui(controller: ControllerInterface) extends Observer {
         style = "-fx-background-color: #cdb91dff; -fx-text-fill: white;"
         onAction = _ => { controller.reset(); urlField.text = "" }
       },
-      new Button("✖") {
-        style = "-fx-background-color: #8b0000; -fx-text-fill: white;"
-        onAction = _ => Platform.exit()
-      }
     )
   }
 
-  // ... (statsBar and mainLayout remain same as previous, ensure Dark Mode styles) ...
   private val statsBar = new HBox(20) {
     padding = Insets(10)
     styleClass += "dashboard-bar"
@@ -89,7 +94,11 @@ class Gui(controller: ControllerInterface) extends Observer {
   private val mainLayout = new BorderPane {
     top = new VBox(mainToolbar, statsBar)
     center = textArea
-    bottom = new HBox { padding = Insets(5); styleClass += "status-bar"; children = Seq(statusLabel) }
+    bottom = new HBox {
+    padding = Insets(5)
+    styleClass += "status-bar"
+    children = Seq(statusLabel, new Region { hgrow = Priority.Always }, modeLabel)
+  }
   }
 
   def createScene(): Scene = {
@@ -108,7 +117,6 @@ class Gui(controller: ControllerInterface) extends Observer {
   private def openFileChooser(): Unit = {
     val fileChooser = new FileChooser()
     fileChooser.title = "Open File or Import Session"
-    // Allow selecting Text, XML or JSON
     fileChooser.extensionFilters.addAll(
     new FileChooser.ExtensionFilter("All Supported", Seq("*.txt", "*.xml", "*.json")),
     new FileChooser.ExtensionFilter("WebScraper Session", Seq("*.xml", "*.json")),
@@ -150,13 +158,11 @@ class Gui(controller: ControllerInterface) extends Observer {
       complexityBar.style = s"-fx-accent: $color;"
       complexityLabel.text = s"Score: ${d.complexity}"
 
-      // Anatomy & Libs
       detailStatsLabel.text = s"Images: ${d.imageCount} | Links: ${d.linkCount}"
       
-      // Clean display of libraries
       val visibleLibs = d.libraries
         .filter(l => famousLibs.exists(fl => l.toLowerCase.contains(fl)))
-        .take(8) // Limit to 8 to prevent UI break
+        .take(8)
         
       famousLibLabel.text = "Famous Libs: " + (if (visibleLibs.isEmpty) "None" else visibleLibs.mkString(", "))
       if (d.libraries.nonEmpty) {

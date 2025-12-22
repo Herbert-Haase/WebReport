@@ -13,4 +13,5 @@ trait ControllerInterface extends Observable {
   def undo(): Unit
   def redo(): Unit
   def reset(): Unit
+  def storageMode: String
 }

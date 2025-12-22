@@ -49,10 +49,18 @@ object Data {
     // Regex Extraction
     val webLibRegex = """(?i)<(script|link)[^>]+(src|href)=["']([^"']+)["']""".r
     val codeLibRegex = """^(import|using|#include)\s+(\S+)""".r
-    val webLibs = lines.flatMap(l => webLibRegex.findAllMatchIn(l).map(_.group(3)))
-    val codeLibs = lines.map(_.trim).filter(l => l.startsWith("import ") || l.startsWith("using ")).map(_.split(" ").lastOption.getOrElse("?"))
-    val allLibs = (webLibs ++ codeLibs).map(_.split("/").last.takeWhile(_ != '?')).distinct.filter(_.nonEmpty)
 
+    val webLibs = lines.flatMap(l => webLibRegex.findAllMatchIn(l).map(_.group(3)))
+    val codeLibs = lines.map(_.trim).filter(l => l.startsWith("import ") || l.startsWith("using "))
+      .map(_.split(" ").lastOption.getOrElse("?"))
+
+    val allLibs = (webLibs ++ codeLibs)
+      .map(_.split("/").last) // Filename
+      .map(_.takeWhile(_ != '?')) // Remove query params
+      .map(_.replaceAll("""[-._][0-9a-fA-F]{8,}.*$""", "")) 
+      .map(_.replaceAll("""(\.min)?\.(js|css)$""", ""))
+      .distinct
+      .filter(_.length > 1)
     val complexityScore = words.count(w => Set("if", "else", "for", "while", "case", "catch", "match", "try").contains(w))
     val imgRegex = """<img[^>]+src=["']([^"']+)["']""".r
     val linkRegex = """<a[^>]+href=["']([^"']+)["']""".r

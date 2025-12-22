@@ -8,6 +8,7 @@ import java.io.{File, PrintWriter}
 import scala.io.Source
 
 class JsonFileIO extends FileIO {
+  override val mode: String = "JSON"
 
   implicit val wordFormat: Format[(String, Int)] = new Format[(String, Int)] {
     def writes(o: (String, Int)): JsValue = Json.obj("word" -> o._1, "count" -> o._2)

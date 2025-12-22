@@ -7,6 +7,7 @@ import scala.xml.{NodeSeq, PrettyPrinter, XML}
 import java.io.{File, PrintWriter}
 
 class XmlFileIO extends FileIO {
+  override val mode: String = "XML"
 
   override def save(dataList: List[ProjectData], filePath: String): Unit = {
     val xml = <session>
