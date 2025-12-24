@@ -37,7 +37,7 @@ WebReport is a sophisticated Scala-based tool designed to analyze web pages and 
 ## Getting Started
 
 ### Prerequisites
-- **Java JDK 11 or higher** (Required for JavaFX support).
+- **Java JDK 11 or higher** (JDK 21 Recommended).
 - **sbt** (Scala Build Tool).
 
 ### Installation
