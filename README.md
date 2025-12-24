@@ -1,78 +1,102 @@
-## WebScraper
+## WebReport Scala3 WebScraper
 [![Coverage Status](https://coveralls.io/repos/github/Herbert-Haase/WebScraper/badge.svg?branch=main)](https://coveralls.io/github/Herbert-Haase/WebScraper?branch=main)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Herbert-Haase/WebScraper/scala.yml)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Herbert-Haase_WebScraper&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Herbert-Haase_WebScraper)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Herbert-Haase_WebScraper&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Herbert-Haase_WebScraper)
 
-WebScraper is a hybrid application built in Scala, demonstrating fundamental Software Engineering design patterns such as **Model-View-Controller (MVC)**, **Command/Memento** for undo/redo functionality, **Observer** for view synchronization, and **Decorator/Template Method** for flexible reporting (TUI). It allows users to load text from local files, manually input, or download content from a specified URL, and then analyze and filter the data.
+```text
+██╗    ██╗███████╗██████╗ ██████╗ ███████╗██████╗  ██████╗ ██████╗ ████████╗
+██║    ██║██╔════╝██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝
+██║ █╗ ██║█████╗  ██████╔╝██████╔╝█████╗  ██████╔╝██║   ██║██████╔╝   ██║   
+██║███╗██║██╔══╝  ██╔══██╗██╔══██╗██╔══╝  ██╔═══╝ ██║   ██║██╔══██╗   ██║   
+╚███╔███╔╝███████╗██████╔╝██║  ██║███████╗██║     ╚██████╔╝██║  ██║   ██║   
+ ╚══╝╚══╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+```
 
-The application provides both a fully featured **Graphical User Interface (GUI)** using ScalaFX and a responsive **Terminal User Interface (TUI)**.
+# WebReport
 
----
+WebReport is a sophisticated Scala-based tool designed to analyze web pages and source code. It provides deep insights into content complexity, library usage, and structural metrics through both a rich Graphical User Interface (GUI) and a scriptable Command Line Interface (TUI).
 
-### Features
+## Features
 
-* **Data Input:** Load content from file path (`file <path>`), manual text input (`text`), or remote URL (`download <url>`).
-* **GUI/TUI Synchronization:** All loaded and filtered data is immediately reflected in both the GUI and TUI via the **Observer Pattern**.
-* **History & Commands:** Full **Undo/Redo** functionality implemented using the **Command** and **Memento** patterns.
-* **Data Analysis:** Automatically calculates character count, word count, and displays the top 5 most common words.
-* **Filtering:** Filter loaded content based on a keyword.
-* **Flexible Reporting (TUI):** Use the **Decorator Pattern** to add features to the report, such as line numbers and forced lower-casing.
-* **HTML Support:** Automatically renders content using a built-in `WebView` if the downloaded data is detected as HTML.
+### Analysis & Metrics
+- **Complexity Scoring**: Calculates a code/content complexity score based on control flow keywords (if, for, match, try, etc.).
+- **Library Detection**: Automatically identifies and lists "Famous Libraries" (e.g., React, Angular, jQuery, Bootstrap) used in the source.
+- **Asset Counting**: Provides detailed counts for images (`<img>`) and hyperlinks (`<a>`).
+- **Text Statistics**: Tracks character counts, word counts, and identifies the top 5 most frequent words.
 
----
+### Dual Interfaces
+- **Interactive GUI**: Built with ScalaFX/JavaFX, featuring a visual dashboard, complexity progress bars, and an embedded web browser for seamless navigation.
+- **Terminal UI (TUI)**: A robust command-line interface supporting piping, filtering, and rapid keyboard-based workflows.
 
-### Architecture and Design Patterns
+### Persistence & State Management
+- **Session Export/Import**: Save your analysis history to XML or JSON formats and reload them later to restore your session state.
+- **Undo/Redo Stack**: Full implementation of the Command Pattern allows you to step backward and forward through every action (download, filter, load).
 
-The entire application is structured around clean design principles:
+## Getting Started
 
-| Component | Design Pattern | Responsibility |
-| :--- | :--- | :--- |
-| **`Controller`** | **Command, Memento, Observer** | The central hub. Receives commands from the views (TUI/GUI), executes them via `UndoManager`, and notifies all attached views of data changes. |
-| **`Tui` / `Gui`** | **Observer** | The views. They subscribe to the `Controller` and render the current state of the `Data` model whenever a change occurs. |
-| **`Data` (Model)** | – | Holds the original content, the currently filtered/displayed content, and all calculated statistics (e.g., word count). |
-| **`UndoManager`** | **Command, Memento** | Manages the command history (`undoStack`, `redoStack`). Commands encapsulate actions (`LoadCommand`, `FilterCommand`, `DownloadCommand`) and their rollback logic.  |
-| **`Renderer`** | **Template Method, Decorator** | In the TUI, `SimpleReport` uses the **Template Method** to define the overall structure (Header, Body, Footer). `LineNumberDecorator` and `LowerCaseDecorator` use the **Decorator Pattern** to dynamically enhance the output.  |
+### Prerequisites
+- **Java JDK 11 or higher** (Required for JavaFX support).
+- **sbt** (Scala Build Tool).
 
----
-
-### Getting Started (SBT)
-
-This project requires **Scala 3** and is built using **SBT (Scala Build Tool)**.
-
-#### Prerequisites
-
-* Java Development Kit (JDK) 21+
-* SBT (Scala Build Tool)
-
-#### Running the Application
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/Herbert-Haase/WebScraper.git
-    cd WebScraper
-    ```
-
-2.  **Start the application:**
-    The application runs with both the GUI and TUI simultaneously. The TUI requires explicit input connection (`connectInput in run := true` in `build.sbt`) to ensure it remains responsive while the GUI is open.
-
-    ```bash
-    sbt run
-    ```
-
-3.  **Use the GUI:** The main window will appear. Use the top toolbar to load data via **Open** (file), **URL** (download), or use the **Filter** box.
-4.  **Use the TUI:** In your terminal, you can interact with the TUI command line while the GUI is running.
-
-    ```
-    Welcome to WebScraper
-
-    [Start] Enter 'file <path>', 'text', 'download <url>', or 'exit':
-    > download [https://example.com](https://example.com)
-    ```
-
-#### Running Tests
-
-To execute the unit tests for the core logic, including the Command/Memento architecture and the new `DownloadCommand`:
-
+### Installation
+1. Clone the repository:
 ```bash
-sbt test
+   git clone https://github.com/Herbert-Haase/WebReport.git
+   cd WebReport
+```
+
+2. Run the application:
+```bash
+   sbt run
+```
+
+## Usage Guide
+
+### Graphical User Interface (GUI)
+The GUI provides a visual dashboard for analyzing content.
+
+- **Navigation**: Enter a URL in the toolbar or click links within the embedded browser to analyze new pages automatically.
+- **Toolbar**:
+  - **⬇ Download**: Fetches and analyzes the URL in the text field.
+  - **📂 Open/Import**: Load a text file or import a saved `.xml`/`.json` session.
+  - **💾 Export Session**: Save your entire analysis history.
+  - **↶ / ↷**: Undo or Redo your last action.
+- **Dashboard**: View real-time metrics, including the complexity score bar and detected libraries.
+
+### Terminal User Interface (TUI)
+The TUI is perfect for quick analysis and keyboard-centric users.
+
+**Commands**:
+
+| Command    | Arguments    | Description                                                      |
+| :--------- | :----------- | :--------------------------------------------------------------- |
+| `download` | `<url>`      | Downloads and analyzes the content from the specified URL.       |
+| `load`     | `<filepath>` | Loads a text file or imports a session (`.xml` or `.json`).      |
+| `text`     | none         | Enters multi-line input mode. Type `.` on a new line to finish.  |
+| `filter`   | `<word>`     | Filters the current view to show only lines containing `<word>`. |
+| `ln`       | none         | Toggles line numbers in the output.                              |
+| `save`     | interactive  | Prompts for a filename to export the current session.            |
+| `undo`     | none         | Reverts the last state change.                                   |
+| `redo`     | none         | Reapplies the last undone action.                                |
+| `reset`    | none         | Clears all data and resets the application state.                |
+| `exit`     | none         | Closes the application.                                          |
+
+## Architecture
+WebReport follows a clean, modular architecture designed for testability and extensibility:
+
+- **MVC Pattern**: Separation of Model (Data/Logic), View (TUI/GUI), and Controller (SessionManager).
+- **Observer Pattern**: The SessionManager notifies both the TUI and GUI of state changes, ensuring both views stay synchronized.
+- **Command Pattern**: All state-modifying actions (Download, Load, Filter) are encapsulated as commands, enabling the robust Undo/Redo system.
+- **Strategy Pattern**: File persistence is handled via a generic FileIO interface, allowing hot-swapping between XmlFileIO and JsonFileIO implementations.
+
+## Technologies
+- **Language**: Scala 3
+- **Build Tool**: sbt
+- **GUI Framework**: ScalaFX / JavaFX
+- **Serialization**: Play-JSON, Scala-XML
+- **Dependency Injection**: Google Guice
+- **Testing**: ScalaTest
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/Herbert-Haase/WebReport/blob/main/LICENSE) file for details.
