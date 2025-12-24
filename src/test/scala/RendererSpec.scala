@@ -1,7 +1,7 @@
-package de.htwg.webscraper.aview
+package de.htwg.webreport.aview
 
-import de.htwg.webscraper.model.data.impl1.Data
-import de.htwg.webscraper.model.data.DataTrait
+import de.htwg.webreport.model.data.impl1.Data
+import de.htwg.webreport.model.data.DataTrait
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 

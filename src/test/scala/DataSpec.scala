@@ -1,8 +1,8 @@
-package de.htwg.webscraper.model
+package de.htwg.webreport.model
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.webscraper.model.data.impl1.Data
+import de.htwg.webreport.model.data.impl1.Data
 
 class DataSpec extends AnyWordSpec with Matchers {
   

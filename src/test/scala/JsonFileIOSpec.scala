@@ -1,8 +1,8 @@
-package de.htwg.webscraper.model.fileio.implJSON
+package de.htwg.webreport.model.fileio.implJSON
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.webscraper.model.data.impl1.Data
+import de.htwg.webreport.model.data.impl1.Data
 import java.io.File
 import play.api.libs.json.Json
 
@@ -16,7 +16,7 @@ class JsonFileIOSpec extends AnyWordSpec with Matchers {
 
     "JsonFileIO" should {
       "save and load session data correctly" in {
-        val fileIO = new de.htwg.webscraper.model.fileio.implJSON.JsonFileIO()
+        val fileIO = new de.htwg.webreport.model.fileio.implJSON.JsonFileIO()
         val tempFile = java.io.File.createTempFile("session", ".json")
         val sample = List(Data.fromContent(List("Line 1"), "json-test"))
         

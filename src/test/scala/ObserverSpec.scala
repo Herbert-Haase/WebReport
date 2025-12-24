@@ -1,8 +1,8 @@
-package de.htwg.webscraper.controller
+package de.htwg.webreport.controller
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.webscraper.util.{Observable, Observer}
+import de.htwg.webreport.util.{Observable, Observer}
 
 // A concrete implementation of Observable that exposes the protected subscribers for testing
 class TestObservable extends Observable {

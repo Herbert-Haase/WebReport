@@ -1,12 +1,12 @@
-package de.htwg.webscraper
+package de.htwg.webreport
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.webscraper.controller.sessionManager.impl1.SessionManager
-import de.htwg.webscraper.model.analyzer.impl1.SimpleAnalyzer
-import de.htwg.webscraper.model.webClient.impl1.SimpleWebClient
-import de.htwg.webscraper.model.fileio.implXML.XmlFileIO
-import de.htwg.webscraper.aview.Tui
+import de.htwg.webreport.controller.sessionManager.impl1.SessionManager
+import de.htwg.webreport.model.analyzer.impl1.SimpleAnalyzer
+import de.htwg.webreport.model.webClient.impl1.SimpleWebClient
+import de.htwg.webreport.model.fileio.implXML.XmlFileIO
+import de.htwg.webreport.aview.Tui
 import java.io.File
 import java.nio.file.Files
 
@@ -62,7 +62,7 @@ class IntegrationSpec extends AnyWordSpec with Matchers {
     "handle all TUI commands in FilterState" in {
       val (sessionManager, tui, _) = createSystem()
       sessionManager.loadFromText("content")
-      val filterState = new de.htwg.webscraper.aview.FilterState()
+      val filterState = new de.htwg.webreport.aview.FilterState()
       
       noException should be thrownBy filterState.handleInput("ln", tui, sessionManager, null)
       noException should be thrownBy filterState.handleInput("undo", tui, sessionManager, null)

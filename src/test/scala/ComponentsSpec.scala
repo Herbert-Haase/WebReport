@@ -1,7 +1,7 @@
-package de.htwg.webscraper.model
+package de.htwg.webreport.model
 
-import de.htwg.webscraper.model.webClient.impl1.SimpleWebClient
-import de.htwg.webscraper.model.analyzer.impl1.SimpleAnalyzer
+import de.htwg.webreport.model.webClient.impl1.SimpleWebClient
+import de.htwg.webreport.model.analyzer.impl1.SimpleAnalyzer
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers

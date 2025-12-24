@@ -1,11 +1,11 @@
-package de.htwg.webscraper.aview
+package de.htwg.webreport.aview
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.webscraper.controller.sessionManager.impl1.SessionManager
-import de.htwg.webscraper.model.analyzer.impl1.SimpleAnalyzer
-import de.htwg.webscraper.model.webClient.impl1.SimpleWebClient
-import de.htwg.webscraper.model.fileio.implXML.XmlFileIO 
+import de.htwg.webreport.controller.sessionManager.impl1.SessionManager
+import de.htwg.webreport.model.analyzer.impl1.SimpleAnalyzer
+import de.htwg.webreport.model.webClient.impl1.SimpleWebClient
+import de.htwg.webreport.model.fileio.implXML.XmlFileIO 
 import javafx.embed.swing.JFXPanel
 import scalafx.application.Platform
 import java.util.concurrent.CountDownLatch
