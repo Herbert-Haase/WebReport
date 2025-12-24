@@ -1,6 +1,6 @@
 ## WebReport Scala3 WebScraper
-[![Coverage Status](https://coveralls.io/repos/github/Herbert-Haase/WebScraper/badge.svg?branch=main)](https://coveralls.io/github/Herbert-Haase/WebScraper?branch=main)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Herbert-Haase/WebScraper/scala.yml)
+[![Coverage Status](https://coveralls.io/repos/github/Herbert-Haase/WebReport/badge.svg?branch=main)](https://coveralls.io/github/Herbert-Haase/WebReport?branch=main)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Herbert-Haase/WebReport/scala.yml)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Herbert-Haase_WebScraper&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Herbert-Haase_WebScraper)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Herbert-Haase_WebScraper&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Herbert-Haase_WebScraper)
 
@@ -12,6 +12,7 @@
 ╚███╔███╔╝███████╗██████╔╝██║  ██║███████╗██║     ╚██████╔╝██║  ██║   ██║   
  ╚══╝╚══╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝
 ```
+
 
 # WebReport
 
@@ -36,7 +37,7 @@ WebReport is a sophisticated Scala-based tool designed to analyze web pages and 
 ## Getting Started
 
 ### Prerequisites
-- **Java JDK 11 or higher** (Required for JavaFX support).
+- **Java JDK 11 or higher** (JDK 21 Recommended).
 - **sbt** (Scala Build Tool).
 
 ### Installation
