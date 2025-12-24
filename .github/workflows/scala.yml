@@ -22,7 +22,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+        fetch-depth: 0
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
@@ -48,18 +48,17 @@ jobs:
         ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Install GUI dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb libgtk-3-0 libgbm1 libasound2
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb libgtk-3-0 libgbm1 libasound2
 
     - name: Run tests and generate coverage report
-      # 'xvfb-run' to provide a virtual display for JavaFX/WebView
       run: xvfb-run --auto-servernum sbt clean coverage test coverageReport
 
     - name: Upload coverage data to Coveralls
       uses: coverallsapp/github-action@v2
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@master
