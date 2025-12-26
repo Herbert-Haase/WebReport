@@ -113,4 +113,10 @@ class DataSpec extends AnyWordSpec with Matchers {
       data.complexity should be(3)
     }
   }
+  "DataTrait" should {
+    "calculate line count correctly" in {
+      val data = Data.fromContent(List("line1", "line2", "line3"), "test")
+      data.lineCount shouldBe 3
+    }
+  }
 }

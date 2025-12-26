@@ -13,11 +13,9 @@ abstract class ReportTemplate extends Renderer {
   final override def render(data: DataTrait, width: Int): String = {
     val effectiveWidth = if (width > 20) width else 80
     
-    // If empty, return ONLY the welcome screen
     if (data.source == "empty") {
       renderWelcome(effectiveWidth)
     } else {
-      // Standard report structure for actual data
       val b = new StringBuilder()
       b.append(buildHeader(effectiveWidth))
       b.append(buildBody(data, effectiveWidth))

@@ -23,8 +23,8 @@ lazy val root = project
       "com.typesafe.play" %% "play-json" % "2.10.4"
     ),
 
-    coverageExcludedFiles := ".*Main\\.scala",
-    coverageExcludedPackages := "<empty>;de.htwg.webreport.WebReport;.*WebReportModule.*",
+    coverageExcludedPackages := "<empty>;de\\.htwg\\.webreport\\.WebReportModule;.*Main.*",
+    coverageExcludedFiles := ".*WebReportModule.*;.*Main.*",
 
     fork := true,
     

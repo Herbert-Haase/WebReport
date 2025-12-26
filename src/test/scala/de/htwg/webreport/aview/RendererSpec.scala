@@ -2,6 +2,7 @@ package de.htwg.webreport.aview
 
 import de.htwg.webreport.model.data.impl1.Data
 import de.htwg.webreport.model.data.DataTrait
+import de.htwg.webreport.aview.Renderer
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -73,6 +74,21 @@ class RendererSpec extends AnyWordSpec with Matchers {
       val decorated = new LineNumberDecorator(new SimpleReport())
       val output = decorated.render(sampleData, 40)
       output should include(" 1. │")
+    }
+  }
+  "ReportRenderer" should {
+    "cover the Decorator path" in {
+      val data = Data.fromContent(List("test"), "src")
+      val decorator = new SimpleReport()
+      decorator.render(data,10).should(include("test"))
+    }
+
+    "cover all branches in ReportTemplate" in {
+      val template = new SimpleReport()
+      val fullReport = template.render(Data.fromContent(List("val x = 1"), "src"), 80)
+      fullReport.should(include("COMPLEXITY"))
+      val emptyReport = template.render(Data.fromContent(Nil, "empty"), 80)
+      emptyReport.should(not(be(empty))) 
     }
   }
 }
