@@ -5,6 +5,7 @@ import de.htwg.webreport.model.data.DataTrait
 import de.htwg.webreport.aview.Renderer
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import scala.io.AnsiColor
 
 class RendererSpec extends AnyWordSpec with Matchers {
 
@@ -62,6 +63,58 @@ class RendererSpec extends AnyWordSpec with Matchers {
       
       output should include(" 1. │ First") 
     }
+
+    "render different complexity colors" in {
+      val renderer = new SimpleReport()
+      
+      val yellowData = Data(List("if","else","for\n"*30, "B" * 100), "source")
+      renderer.render(yellowData, 80) should include(AnsiColor.YELLOW)
+
+      val redData = Data(List("for\n"*60), "source")
+      renderer.render(redData, 80) should include(AnsiColor.RED)
+    }
+    "display famous libraries using mkString" in {
+      val renderer = new SimpleReport()
+      val baseData = Data.fromContent(List("some content"), "source")
+      val dataWithLibs = baseData.copy(
+        libraries = List("react-js", "jquery-min")
+      )
+      
+      val output = renderer.render(dataWithLibs, 80)
+      
+      output should include("react-js, jquery-min")
+    }
+
+
+    "trigger the early return for welcome screen" in {
+      val renderer = new SimpleReport()
+      val emptyData = Data.fromContent(Nil, "empty")
+      
+      val output = renderer.render(emptyData, 80)
+      output should include("██╗")
+    }
+
+    "explicitly trigger the early return on line 109" in {
+      val renderer = new SimpleReport()
+      
+      val emptyData = de.htwg.webreport.model.data.impl1.Data(
+        source = "empty",
+        originalLines = Nil,
+        displayLines = Nil,
+        characterCount = 0,
+        wordCount = 0,
+        mostCommonWords = Nil,
+        libraries = Nil,
+        complexity = 0,
+        images = Nil,
+        links = Nil
+      )
+
+      val output = renderer.render(emptyData, 80)
+
+      output should include("██╗")
+      output should not include("DASHBOARD")
+    }
   }
   "A SimpleReport" should {
     "handle very narrow widths by defaulting to 80" in {
@@ -89,6 +142,18 @@ class RendererSpec extends AnyWordSpec with Matchers {
       fullReport.should(include("COMPLEXITY"))
       val emptyReport = template.render(Data.fromContent(Nil, "empty"), 80)
       emptyReport.should(not(be(empty))) 
+    }
+  }
+
+  "RendererDecorator" should {
+    "execute the base render method" in {
+      val inner = new SimpleReport()
+      val baseDecorator = new RendererDecorator(inner) {}
+      
+      val data = Data.fromContent(List("test"), "src")
+      val output = baseDecorator.render(data, 80)
+      
+      output shouldBe inner.render(data, 80)
     }
   }
 }

@@ -6,17 +6,17 @@ import de.htwg.webreport.model.fileio.FileIOTrait
 import de.htwg.webreport.aview.{Tui, Gui}
 import scalafx.application.JFXApp3
 import scalafx.application.JFXApp3.PrimaryStage
+import scalafx.application.Platform
+import scalafx.Includes._
 
 object Main extends JFXApp3 {
   override def start(): Unit = {
 
     val injector = Guice.createInjector(new WebReportModule)
-
     val sessionManager = injector.getInstance(classOf[SessionManagerTrait])
     val fileIO = injector.getInstance(classOf[FileIOTrait])
 
     val tui = new Tui(sessionManager, fileIO)
-    val gui = new Gui(sessionManager)
 
     val tuiThread = new Thread(() => {
       tui.run()
@@ -24,11 +24,15 @@ object Main extends JFXApp3 {
     tuiThread.setDaemon(true)
     tuiThread.start()
 
-    stage = new PrimaryStage {
-      title = "WebReport"
-      width = 1100
-      height = 800
-      scene = gui.createScene()
+    if (System.getProperty("testMode") != "true") {
+      val gui = new Gui(sessionManager)
+      stage = new PrimaryStage {
+        scene = gui.createScene()
+        
+        onCloseRequest = e => {
+          System.exit(0)
+        }
+      }
     }
   }
 }

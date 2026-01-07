@@ -7,13 +7,16 @@ import scala.io.StdIn.readLine
 
 class Tui(sessionManager: SessionManagerTrait, val fileIO: FileIOTrait) extends Observer {
   sessionManager.add(this)
+  private var running = true
 
-  private var state: TuiState = new InitialState()
+  private[aview] var state: TuiState = new InitialState()
   private var renderer: Renderer = new SimpleReport()
   private var showNumbers = false
   private var showLowerCase = false
 
   def changeState(newState: TuiState): Unit = { this.state = newState }
+
+  def stop(): Unit = { running = false }
 
   def toggleLineNumbers(): Unit = { showNumbers = !showNumbers; updateRenderer() }
   def toggleLowerCase(): Unit = { showLowerCase = !showLowerCase; updateRenderer() }
@@ -31,12 +34,14 @@ class Tui(sessionManager: SessionManagerTrait, val fileIO: FileIOTrait) extends 
   }
 
   def inputLoop(): Unit = {
-    Option(readLine()) match {
-      case Some(input) =>
-        state.handleInput(input, this, sessionManager, fileIO)
-        inputLoop()
-      case None =>
-        println("\nExiting.")
+    if (running) {
+      Option(readLine()) match {
+        case Some(input) =>
+          state.handleInput(input, this, sessionManager, fileIO)
+          inputLoop()
+        case None =>
+          println("\nExiting.")
+      }
     }
   }
 

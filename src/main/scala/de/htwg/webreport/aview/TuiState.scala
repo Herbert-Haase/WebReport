@@ -51,7 +51,7 @@ class InitialState extends TuiState {
         
       case "exit" | "quit" => 
         println("Bye!")
-        System.exit(0)
+        tui.stop()
         
       case _ => 
         println(s"Invalid command: $command")
@@ -76,7 +76,9 @@ class FilterState extends TuiState {
       case "reset" :: Nil =>
         sessionManager.reset()
         tui.changeState(new InitialState)
-      case "exit" :: Nil => System.exit(0)
+      case "exit" :: Nil =>
+        println("Bye!")
+        tui.stop()
       case "save" :: Nil => 
         println("Enter filename:")
         val path = readLine()
