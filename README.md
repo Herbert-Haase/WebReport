@@ -18,6 +18,10 @@
 
 WebReport is a sophisticated Scala-based tool designed to analyze web pages and source code. It provides deep insights into content complexity, library usage, and structural metrics through both a rich Graphical User Interface (GUI) and a scriptable Command Line Interface (TUI).
 
+<p align="center">
+  <img src="./src/main/resources/gui.png" width="800">
+</p>
+
 ## Features
 
 ### Analysis & Metrics

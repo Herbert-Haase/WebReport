@@ -30,6 +30,40 @@ class JsonFileIOSpec extends AnyWordSpec with Matchers {
           tempFile.delete()
         }
       }
+
+      "use the implicit dataFormat" in {
+        val fileIO = new JsonFileIO()
+        import fileIO.dataFormat
+        val data = Data.fromContent(List("test"), "src")
+        val json = play.api.libs.json.Json.toJson(data)
+        json.as[Data].source shouldBe "src"
+      }
+
+      "handle non-concrete DataTrait implementations (the 'other' branch)" in {
+        val fileIO = new JsonFileIO()
+        val tempFile = java.io.File.createTempFile("other_data", ".json")
+        
+        val otherData = new de.htwg.webreport.model.data.DataTrait {
+          def source = "custom"
+          def originalLines = List("line1")
+          def displayLines = List("line1")
+          def characterCount = 5
+          def wordCount = 1
+          def mostCommonWords = Nil
+          def libraries = List("custom-lib")
+          def complexity = 0
+          def images = List("img.png")
+          def links = List("link.com")
+          def imageCount = 1
+          def linkCount = 1
+        }
+
+        try {
+          fileIO.save(List(otherData), tempFile.getAbsolutePath)
+          val loaded = fileIO.load(tempFile.getAbsolutePath)
+          loaded.head.source shouldBe "custom"
+        } finally { tempFile.delete() }
+      }
     }
     "save and load a list of Data objects correctly" in {
         val tempFile = File.createTempFile("test_session", ".json")
