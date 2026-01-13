@@ -37,11 +37,11 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
   lazy val modeLabel = new Label(s"Storage: ${sessionManager.storageMode}") {
     style = "-fx-text-fill: #808080; -fx-padding: 0 0 0 10;"
   }
-  
+
   private lazy val statusLabel = new Label("Welcome to WebReport")
   private lazy val complexityLabel = new Label("Complexity: 0")
   private lazy val complexityBar = new ProgressBar() { prefWidth = 150 }
-  
+
   private lazy val famousLibLabel = new Label("Libraries: None") {
     maxWidth = 400
     styleClass += "dashboard-text"
@@ -51,11 +51,11 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
   // -- Toolbar --
   private lazy val mainToolbar = new ToolBar {
     content = List(
-      new Button("📂 Open/Import") { onAction = _ => openFileChooser() },
-      
+      new Button("⇪ Open/Import") { onAction = _ => openFileChooser() },
+
       new Separator,
       urlField,
-      new Button("⬇ Download") { 
+      new Button("\u2193 Download") {
         onAction = _ => {
           if (urlField.text.value.nonEmpty) {
             sessionManager.downloadFromUrl(urlField.text.value)
@@ -63,19 +63,19 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
           }
         }
       },
-      
+
       new Separator,
       new Button("↶") { onAction = _ => sessionManager.undo(); tooltip = new Tooltip("Undo") },
       new Button("↷") { onAction = _ => sessionManager.redo(); tooltip = new Tooltip("Redo") },
-      
+
       new Separator,
-      new Button("💾 Export Session") { 
-        onAction = _ => exportSession() 
+      new Button("\u2399 Export Session") {
+        onAction = _ => exportSession()
         tooltip = new Tooltip("Save cumulative history to XML/JSON")
       },
-      
+
       new Region { hgrow = Priority.Always }, // Spacer
-      
+
       new Button("Reset") {
         style = "-fx-background-color: #cdb91dff; -fx-text-fill: white;"
         onAction = _ => { sessionManager.reset(); urlField.text = "" }
@@ -136,7 +136,7 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
   })
 
   // --- File Operations ---
-  
+
   private def openFileChooser(): Unit = {
     val fileChooser = new FileChooser()
     fileChooser.title = "Open File or Import Session"
@@ -182,8 +182,8 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
       complexityLabel.text = s"Score: ${d.complexity}"
 
       detailStatsLabel.text = s"Images: ${d.imageCount} | Links: ${d.linkCount}"
-      
-      val visibleLibs = GuiLogic.getVisibleLibs(d.libraries, famousLibs)        
+
+      val visibleLibs = GuiLogic.getVisibleLibs(d.libraries, famousLibs)
       famousLibLabel.text = "Famous Libs: " + (if (visibleLibs.isEmpty) "None" else visibleLibs.mkString(", "))
       if (d.libraries.nonEmpty) {
          famousLibLabel.tooltip = new Tooltip(d.libraries.mkString("\n"))
@@ -210,7 +210,7 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
 // for testing
 object GuiLogic {
   def getVisibleLibs(libs: List[String], famous: Set[String]): List[String] = {
-    libs.filter(l => 
+    libs.filter(l =>
       famous.exists(f => l.toLowerCase.contains(f.toLowerCase))
     ).distinct.take(8)
   }
