@@ -67,10 +67,10 @@ class RendererSpec extends AnyWordSpec with Matchers {
     "render different complexity colors" in {
       val renderer = new SimpleReport()
       
-      val yellowData = Data(List("if","else","for\n"*30, "B" * 100), "source")
+      val yellowData = Data(List("for\n"*50, "B\n" * 1000), "source")
       renderer.render(yellowData, 80) should include(AnsiColor.YELLOW)
 
-      val redData = Data(List("for\n"*60), "source")
+      val redData = Data(List("for\n"*500, "B\n" * 1000), "source")
       renderer.render(redData, 80) should include(AnsiColor.RED)
     }
     "display famous libraries using mkString" in {

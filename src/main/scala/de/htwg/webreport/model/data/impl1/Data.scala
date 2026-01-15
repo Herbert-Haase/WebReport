@@ -63,7 +63,8 @@ object Data {
       .map(_.replaceAll("""[-._][0-9a-fA-F]{8,}.*$""", ""))
       .distinct
       .filter(_.length > 1)
-    val complexityScore = words.count(w => Set("if", "else", "for", "while", "case", "catch", "match", "try").contains(w))
+    val keywordCount = words.count(w => Set("if", "else", "for", "while", "case", "catch", "match", "try").contains(w))
+    val complexityScore = if (words.isEmpty) 0 else ((keywordCount.toDouble / words.length) * 1000).toInt
     val imgRegex = """<img[^>]+src=["']([^"']+)["']""".r
     val linkRegex = """<a[^>]+href=["']([^"']+)["']""".r
 

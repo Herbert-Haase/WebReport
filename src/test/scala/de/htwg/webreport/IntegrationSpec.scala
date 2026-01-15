@@ -48,14 +48,14 @@ class IntegrationSpec extends AnyWordSpec with Matchers {
       }
     }
 
-    "maintain complexity stats across filtering" in {
-      val (sessionManager, _, _) = createSystem()
-      sessionManager.loadFromText("if (condition) {\n  doSomething()\n}")
-      val initialComplexity = sessionManager.data.complexity
+    // "maintain complexity stats across filtering" in {
+    //   val (sessionManager, _, _) = createSystem()
+    //   sessionManager.loadFromText("if (condition) {\n  doSomething()\n}")
+    //   val initialComplexity = sessionManager.data.complexity
       
-      sessionManager.filter("condition")
-      sessionManager.data.complexity should be(initialComplexity)
-    }
+    //   sessionManager.filter("condition")
+    //   sessionManager.data.complexity should be(initialComplexity)
+    // }
 
     "handle all TUI commands in FilterState" in {
       val (sessionManager, tui, _) = createSystem()

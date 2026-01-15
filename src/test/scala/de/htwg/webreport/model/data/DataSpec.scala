@@ -10,7 +10,7 @@ class DataSpec extends AnyWordSpec with Matchers {
     "calculate complexity score for all keywords" in {
       val keywords = List("if else for while case catch match try")
       val data = Data.fromContent(keywords, "test")
-      data.complexity should be(8) 
+      data.complexity should be(1000) 
     }
 
     "identify libraries correctly" in {
@@ -38,7 +38,7 @@ class DataSpec extends AnyWordSpec with Matchers {
       val data = Data.fromContent(html, "complex-test")
       
       data.libraries should contain allOf ("react-v18", "custom", "Scraper")
-      data.complexity should be(4) 
+      data.complexity should be(121) 
       data.imageCount should be(1)
       data.linkCount should be(1)
     }
@@ -110,7 +110,7 @@ class DataSpec extends AnyWordSpec with Matchers {
     }
     "calculate complexity correctly" in {
       val data = Data.fromContent(List("if (x) { for (y) { match z } }"), "test")
-      data.complexity should be(3)
+      data.complexity should be(500)
     }
   }
   "DataTrait" should {
