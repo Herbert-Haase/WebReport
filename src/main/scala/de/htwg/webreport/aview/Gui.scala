@@ -14,6 +14,8 @@ import javafx.concurrent.Worker
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import scalafx.scene.web.WebView
 import scala.compiletime.uninitialized
+import java.io.File
+
 
 class Gui(sessionManager: SessionManagerTrait) extends Observer {
   sessionManager.add(this)
@@ -22,9 +24,10 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
   private var parentStage: scalafx.stage.Window = uninitialized
 
   // -- UI Components --
-  private lazy val webView = new WebView()
-  private lazy val textArea = new TextArea { editable = false; styleClass += "code-area" }
-  private lazy val urlField = new TextField {
+  private[aview] lazy val webView = new WebView()
+  private[aview] lazy val textArea = new TextArea { editable = false; styleClass += "code-area" }
+  
+  private[aview] lazy val urlField = new TextField {
     promptText = "http://..."
     hgrow = Priority.Always
     onAction = _ => {
@@ -42,24 +45,25 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
   private lazy val complexityLabel = new Label("Complexity: 0")
   private lazy val complexityBar = new ProgressBar() { prefWidth = 150 }
 
-  private lazy val famousLibLabel = new Label("Libraries: None") {
+  private[aview] lazy val famousLibLabel = new Label("Libraries: None") {
     maxWidth = 400
     styleClass += "dashboard-text"
   }
   private lazy val detailStatsLabel = new Label("Images: 0 | Links: 0")
 
   // -- Toolbar --
-  private lazy val mainToolbar = new ToolBar {
+  private[aview] lazy val mainToolbar = new ToolBar {
     content = List(
-      new Button("⇪ Open/Import") { onAction = _ => openFileChooser() },
+      new Button("⇪ Open/Import") {id="openBtn"; onAction = _ => openFileChooser() },
 
       new Separator,
       urlField,
       new Button("\u2193 Download") {
+        id = "dlBtn"
         onAction = _ => {
           if (urlField.text.value.nonEmpty) {
             sessionManager.downloadFromUrl(urlField.text.value)
-            urlField.text.value = ""
+            urlField.text = ""
           }
         }
       },
@@ -70,6 +74,7 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
 
       new Separator,
       new Button("\u2399 Export Session") {
+        id = "exportBtn"
         onAction = _ => exportSession()
         tooltip = new Tooltip("Save cumulative history to XML/JSON")
       },
@@ -77,8 +82,13 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
       new Region { hgrow = Priority.Always }, // Spacer
 
       new Button("Reset") {
+        id = "resetBtn"
         style = "-fx-background-color: #cdb91dff; -fx-text-fill: white;"
-        onAction = _ => { sessionManager.reset(); urlField.text = "" }
+        onAction = _ => { 
+          sessionManager.reset()
+          webView.engine.loadContent("")
+          if (mainLayout.center.value != textArea.delegate) mainLayout.center = textArea
+        }
       },
     )
   }
@@ -93,14 +103,14 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
     )
   }
 
-  private lazy val mainLayout = new BorderPane {
+  private[aview] lazy val mainLayout: BorderPane = new BorderPane {
     top = new VBox(mainToolbar, statsBar)
     center = textArea
     bottom = new HBox {
-    padding = Insets(5)
-    styleClass += "status-bar"
-    children = Seq(statusLabel, new Region { hgrow = Priority.Always }, modeLabel)
-  }
+      padding = Insets(5)
+      styleClass += "status-bar"
+      children = Seq(statusLabel, new Region { hgrow = Priority.Always }, modeLabel)
+    }
   }
 
   def createScene(): Scene = {
@@ -114,28 +124,21 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
     myScene
   }
 
-    // -- Web Engine Configuration for Navigation --
-  webView.engine.getLoadWorker.stateProperty.addListener(new ChangeListener[Worker.State] {
-    override def changed(observable: ObservableValue[? <: Worker.State], oldValue: Worker.State, newValue: Worker.State): Unit = {
-      if (newValue == Worker.State.SUCCEEDED) {
-      }
-    }
+  // -- Web Engine Configuration for Navigation --
+  webView.engine.getLoadWorker.stateProperty.addListener((_, _, newValue) => {
+    if (newValue == Worker.State.SUCCEEDED) { }
   })
 
   // This listener intercepts link clicks in the WebView
-  webView.engine.locationProperty.addListener(new ChangeListener[String] {
-    override def changed(observable: ObservableValue[? <: String], oldValue: String, newValue: String): Unit = {
-      if (newValue != null && newValue.nonEmpty) {
-        urlField.text = newValue
-
-        Platform.runLater {
-          sessionManager.downloadFromUrl(newValue)
-        }
-      }
+  webView.engine.locationProperty.addListener((_, _, newValue) => {
+    if (newValue != null && newValue.nonEmpty && newValue != "about:blank") {
+      Platform.runLater { sessionManager.downloadFromUrl(newValue) }
     }
   })
 
   // --- File Operations ---
+  protected def showOpenDialog(fc: FileChooser): File = fc.showOpenDialog(parentStage)
+  protected def showSaveDialog(fc: FileChooser): File = fc.showSaveDialog(parentStage)
 
   private def openFileChooser(): Unit = {
     val fileChooser = new FileChooser()
@@ -145,7 +148,7 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
     new FileChooser.ExtensionFilter("WebReport Session", Seq("*.xml", "*.json")),
     new FileChooser.ExtensionFilter("Text Files", "*.txt")
     )
-    val selectedFile = fileChooser.showOpenDialog(parentStage)
+    val selectedFile = showOpenDialog(fileChooser)
     if (selectedFile != null) {
       sessionManager.loadFromFile(selectedFile.getAbsolutePath)
     }
@@ -158,7 +161,7 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
       new FileChooser.ExtensionFilter("XML Data", "*.xml"),
       new FileChooser.ExtensionFilter("JSON Data", "*.json")
     )
-    val file = fileChooser.showSaveDialog(parentStage)
+    val file = showSaveDialog(fileChooser)
     if (file != null) {
       sessionManager.saveSession(file.getAbsolutePath)
     }
@@ -191,8 +194,19 @@ class Gui(sessionManager: SessionManagerTrait) extends Observer {
 
       // Content View
       if (isHtml(content)) {
-        if (d.source.startsWith("http")) webView.engine.loadContent(content)
-        else webView.engine.loadContent(content)
+        val finalContent = if (d.source.startsWith("http")) {
+        val baseUrl = if (d.source.endsWith("/")) d.source else d.source.substring(0, d.source.lastIndexOf('/') + 1)
+        
+        if (content.toLowerCase.contains("<head>")) {
+          content.replaceFirst("(?i)<head>", s"<head><base href='${d.source}'>")
+        } else {
+          s"<html><head><base href='${d.source}'></head>$content</html>"
+        }
+      } else {
+        content
+      }
+
+        webView.engine.loadContent(finalContent)
         if (mainLayout.center.value != webView) mainLayout.center = webView
       } else {
         textArea.text = content
