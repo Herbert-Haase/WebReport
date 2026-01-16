@@ -103,5 +103,47 @@ class JsonFileIOSpec extends AnyWordSpec with Matchers {
         }
         tempFile.delete()
     }
+
+    "explicitly exercise the implicit dataFormat for JSON serialization" in {
+    val fileIO = new JsonFileIO()
+    import fileIO.dataFormat
+    
+    val sampleData = Data(
+      source = "test-format",
+      originalLines = List("line1"),
+      displayLines = List("line1"),
+      characterCount = 5,
+      wordCount = 1,
+      mostCommonWords = List(("line1", 1)),
+      libraries = List("scala"),
+      complexity = 10,
+      images = Nil,
+      links = Nil
+    )
+
+    val json = Json.toJson(sampleData)
+    (json \ "source").as[String] should be("test-format")
+    
+    val deserialized = json.as[Data]
+    deserialized.source should be(sampleData.source)
+    deserialized.mostCommonWords should contain ("line1", 1)
+  }
+
+    "fully exercise the manual dataFormat round-trip" in {
+    val fileIO = new JsonFileIO()
+    import fileIO.dataFormat
+    
+    val sample = Data(
+      "src", List("orig"), List("disp"), 10, 2, 
+      List(("word", 1)), List("lib"), 5, List("img"), List("lnk")
+    )
+
+    val json = Json.toJson(sample)
+    (json \ "source").as[String] shouldBe "src"
+    (json \ "complexity").as[Int] shouldBe 5
+
+    val result = json.as[Data]
+    result shouldBe sample
+  }
   }
 }

@@ -156,4 +156,29 @@ class RendererSpec extends AnyWordSpec with Matchers {
       output shouldBe inner.render(data, 80)
     }
   }
+
+  "trigger the early return in buildBody when displayLines is empty but source is not 'empty'" in {
+    val renderer = new SimpleReport()
+    
+    // Create data that has a valid source but no lines to display
+    val dataWithNoLines = de.htwg.webreport.model.data.impl1.Data(
+      source = "manual-source",
+      originalLines = Nil,
+      displayLines = Nil,
+      characterCount = 0,
+      wordCount = 0,
+      mostCommonWords = Nil,
+      libraries = Nil,
+      complexity = 0,
+      images = Nil,
+      links = Nil
+    )
+    
+    val output = renderer.render(dataWithNoLines, 80)
+    
+    // Verify it returns the welcome screen (Line 109)
+    output should include("██╗") // Logo part of welcome screen
+    output should include("Type 'download <url>'") // Hint text
+    output should include("DASHBOARD") // Dashboard should only show for actual content
+  }
 }

@@ -18,7 +18,33 @@ class JsonFileIO extends FileIOTrait {
     } yield (w, c)
   }
 
-  implicit val dataFormat: OFormat[Data] = Json.format[Data]
+  implicit val dataFormat: OFormat[Data] = new OFormat[Data] {
+    override def writes(d: Data): JsObject = Json.obj(
+      "source" -> d.source,
+      "originalLines" -> d.originalLines,
+      "displayLines" -> d.displayLines,
+      "characterCount" -> d.characterCount,
+      "wordCount" -> d.wordCount,
+      "mostCommonWords" -> d.mostCommonWords,
+      "libraries" -> d.libraries,
+      "complexity" -> d.complexity,
+      "images" -> d.images,
+      "links" -> d.links
+    )
+
+    override def reads(json: JsValue): JsResult[Data] = for {
+      source <- (json \ "source").validate[String]
+      originalLines <- (json \ "originalLines").validate[List[String]]
+      displayLines <- (json \ "displayLines").validate[List[String]]
+      characterCount <- (json \ "characterCount").validate[Int]
+      wordCount <- (json \ "wordCount").validate[Int]
+      mostCommonWords <- (json \ "mostCommonWords").validate[List[(String, Int)]]
+      libraries <- (json \ "libraries").validate[List[String]]
+      complexity <- (json \ "complexity").validate[Int]
+      images <- (json \ "images").validate[List[String]]
+      links <- (json \ "links").validate[List[String]]
+    } yield Data(source, originalLines, displayLines, characterCount, wordCount, mostCommonWords, libraries, complexity, images, links)
+  }
 
   override def save(dataList: List[DataTrait], filePath: String): Unit = {
     val concreteList = dataList.map {
@@ -40,9 +66,10 @@ class JsonFileIO extends FileIOTrait {
     if (!file.exists()) throw new java.io.FileNotFoundException(s"File not found: $filePath")
     
     val source = Source.fromFile(file)
-    val content = source.getLines().mkString
+    val jsonString = source.getLines().mkString
     source.close()
     
-    Json.parse(content).as[List[Data]] 
+    val json = Json.parse(jsonString)
+    json.as[List[Data]]
   }
 }

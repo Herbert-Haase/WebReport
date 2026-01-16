@@ -93,5 +93,78 @@ class sessionManagerSpec extends AnyWordSpec with Matchers {
     sessionManager.data.displayLines.head should include("Injected Network Error")
   }
 
+
+    "Undo and Redo SetStateCommand via loadFromFile success" in {
+    val mockFileIO = new de.htwg.webreport.model.fileio.FileIOTrait {
+      override val mode: String = "MOCK"
+      override def save(data: List[de.htwg.webreport.model.data.DataTrait], path: String): Unit = {}
+      override def load(path: String): List[de.htwg.webreport.model.data.DataTrait] = {
+        val analyzer = new de.htwg.webreport.model.analyzer.impl1.SimpleAnalyzer()
+        List(analyzer.process(List("Historical State"), None, "history-src"))
+      }
+    }
+    val sm = new de.htwg.webreport.controller.sessionManager.impl1.SessionManager(
+      new de.htwg.webreport.model.analyzer.impl1.SimpleAnalyzer(),
+      new de.htwg.webreport.model.webClient.impl1.SimpleWebClient(),
+      mockFileIO
+    )
+
+    sm.loadFromFile("dummy-path")
+    sm.data.displayLines should be(List("Historical State"))
+
+    sm.undo()
+    sm.data.displayLines should be(empty)
+
+    sm.redo()
+    sm.data.displayLines should be(List("Historical State"))
+  }
+
+    "Undo and Redo LoadCommand via loadFromText" in {
+    val sessionManager = createsessionManager()
+    
+    sessionManager.loadFromText("Text for LoadCommand") 
+    sessionManager.data.displayLines should be(List("Text for LoadCommand"))
+    
+    sessionManager.undo()
+    sessionManager.data.displayLines should be(empty)
+    
+    sessionManager.redo()
+    sessionManager.data.displayLines should be(List("Text for LoadCommand"))
+  }
+
+
+    "Undo and Redo DownloadCommand correctly" in {
+    val sessionManager = createsessionManager()
+    
+    sessionManager.downloadFromUrl("http://undo-test-url.com")
+    val downloadedState = sessionManager.data
+    downloadedState.source should be("http://undo-test-url.com")
+    
+    sessionManager.undo()
+    sessionManager.data.source should be("empty")
+    
+    sessionManager.redo()
+    sessionManager.data.source should be("http://undo-test-url.com")
+    sessionManager.data.displayLines should be (downloadedState.displayLines)
+  }
+
+    "Undo and redo DownloadCommand correctly" in {
+    val failingClient = new FailingClient()
+    val sm = new de.htwg.webreport.controller.sessionManager.impl1.SessionManager(
+      new de.htwg.webreport.model.analyzer.impl1.SimpleAnalyzer(), 
+      failingClient, 
+      new de.htwg.webreport.model.fileio.implXML.XmlFileIO()
+    )
+    
+    sm.downloadFromUrl("http://test-undo-redo.com")
+    sm.data.source should be("http://test-undo-redo.com")
+    
+    sm.undo()
+    sm.data.source should be("empty")
+    
+    sm.redo()
+    sm.data.source should be("http://test-undo-redo.com")
+  }
+
   }
 }
