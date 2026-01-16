@@ -51,9 +51,15 @@ WebReport is a sophisticated Scala-based tool designed to analyze web pages and 
    cd WebReport
 ```
 
-2. Run the application:
+2. Run the docker:
 ```bash
-   sbt run
+   ./docker-run.sh
+```
+
+
+3. Run the application:
+```bash
+   run
 ```
 
 ## Usage Guide
