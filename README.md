@@ -55,6 +55,8 @@ WebReport is a sophisticated Scala-based tool designed to analyze web pages and 
 ```bash
    ./docker-run.sh
 ```
+When run for the first time, docker container takes longer to build.
+It gets faster, through caching, on future uses.
 
 
 3. Run the application:

@@ -273,7 +273,7 @@ style: |
     <div><span class="tree-folder tree-folder-blue">src/main/scala/de/htwg/webreport/</span></div>
     <div>├── <span class="tree-folder tree-folder-blue">aview/</span> <span class="tree-bar"><span class="tree-bar-fill bar-blue w-80"></span></span> ~350 LOC</div>
     <div>│   ├── Gui.scala</div>
-    <div>│   ├── Tui. scala</div>
+    <div>│   ├── Tui.scala</div>
     <div>│   ├── TuiState.scala</div>
     <div>│   └── Renderer.scala</div>
     <div>├── <span class="tree-folder tree-folder-yellow">controller/</span> <span class="tree-bar"><span class="tree-bar-fill bar-yellow w-35"></span></span> ~150 LOC</div>
@@ -296,7 +296,7 @@ style: |
   
   <table>
     <tr><th>Test File</th><th>Purpose</th></tr>
-    <tr><td>WebReportSpec. scala</td><td>Integration tests</td></tr>
+    <tr><td>WebReportSpec.scala</td><td>Integration tests</td></tr>
     <tr><td>IntegrationSpec.scala</td><td>Full system tests</td></tr>
     <tr><td>TuiSpec.scala</td><td>Terminal UI tests</td></tr>
     <tr><td>TuiStateSpec.scala</td><td>State pattern tests</td></tr>
@@ -323,14 +323,14 @@ style: |
   
   <div class="arch-layer arch-controller">
     <strong class="color-yellow">CONTROLLER LAYER</strong><br>
-    <span class="arch-box arch-box-yellow">SessionManager (Observable + Originator)</span>
+    <span class="arch-box arch-box-yellow">SessionManager</span>
     <br><em class="color-gray" style="font-size: 0.8em;">← Command Pattern | Memento Pattern</em>
   </div>
   
   <div class="arch-layer arch-model">
     <strong class="color-green">MODEL LAYER</strong><br>
-    <span class="arch-box arch-box-green">Analyzer (Trait)</span>
-    <span class="arch-box arch-box-green">WebClient (Trait)</span>
+    <span class="arch-box arch-box-green">Analyzer</span>
+    <span class="arch-box arch-box-green">WebClient</span>
     <span class="arch-box arch-box-green">FileIO (XML/JSON)</span>
     <br><em class="color-gray" style="font-size: 0.8em;">← Strategy Pattern</em>
   </div>
@@ -358,32 +358,32 @@ style: |
   <h2>Component Complexity</h2>
   
   <div class="bar-row">
-    <span class="bar-label">SessionManager</span>
+    <span class="bar-label-larger">SessionManager</span>
     <span class="bar-track"><span class="bar-fill bar-red w-95"></span></span>
     <span class="bar-value">●●●●●</span>
   </div>
   <div class="bar-row">
-    <span class="bar-label">Renderer</span>
+    <span class="bar-label-larger">Renderer</span>
     <span class="bar-track"><span class="bar-fill bar-yellow w-75"></span></span>
     <span class="bar-value">●●●●○</span>
   </div>
   <div class="bar-row">
-    <span class="bar-label">Tui</span>
+    <span class="bar-label-larger">Tui</span>
     <span class="bar-track"><span class="bar-fill bar-yellow w-60"></span></span>
     <span class="bar-value">●●●○○</span>
   </div>
   <div class="bar-row">
-    <span class="bar-label">Gui</span>
+    <span class="bar-label-larger">Gui</span>
     <span class="bar-track"><span class="bar-fill bar-green w-55"></span></span>
     <span class="bar-value">●●●○○</span>
   </div>
   <div class="bar-row">
-    <span class="bar-label">Data</span>
+    <span class="bar-label-larger">Data</span>
     <span class="bar-track"><span class="bar-fill bar-green w-40"></span></span>
     <span class="bar-value">●●○○○</span>
   </div>
   <div class="bar-row">
-    <span class="bar-label">FileIO</span>
+    <span class="bar-label-larger">FileIO</span>
     <span class="bar-track"><span class="bar-fill bar-green w-30"></span></span>
     <span class="bar-value">●●○○○</span>
   </div>
